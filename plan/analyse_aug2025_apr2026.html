@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trainingsanalyse — Aug 2025 bis Apr 2026</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3348;
+      --accent: #4f8ef7;
+      --green: #34c77b;
+      --yellow: #f7c948;
+      --red: #e05c6e;
+      --purple: #a78bfa;
+      --text: #e4e6f0;
+      --muted: #7a7f9a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif; font-size: 15px; line-height: 1.7; padding: 40px 24px 80px; }
+    .container { max-width: 1000px; margin: 0 auto; }
+
+    h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+    .subtitle { color: var(--muted); margin-bottom: 48px; font-size: 14px; }
+    h2 { font-size: 18px; font-weight: 600; margin: 48px 0 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 28px 0 12px; }
+
+    /* Stat cards */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; margin-bottom: 8px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 16px; }
+    .stat-card .val { font-size: 28px; font-weight: 700; line-height: 1.1; margin-bottom: 4px; }
+    .stat-card .lbl { font-size: 12px; color: var(--muted); }
+    .val-green  { color: var(--green); }
+    .val-blue   { color: var(--accent); }
+    .val-yellow { color: var(--yellow); }
+    .val-purple { color: var(--purple); }
+    .val-red    { color: var(--red); }
+
+    /* Timeline */
+    .timeline { position: relative; padding-left: 24px; }
+    .timeline::before { content: ''; position: absolute; left: 7px; top: 6px; bottom: 6px; width: 2px; background: var(--border); }
+    .tl-item { position: relative; margin-bottom: 20px; }
+    .tl-item::before { content: ''; position: absolute; left: -20px; top: 8px; width: 10px; height: 10px; border-radius: 50%; background: var(--surface2); border: 2px solid var(--border); }
+    .tl-item.active::before { border-color: var(--green); background: var(--green); }
+    .tl-item.injury::before { border-color: var(--red); background: var(--red); }
+    .tl-item.comeback::before { border-color: var(--yellow); background: var(--yellow); }
+    .tl-date { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+    .tl-text { font-size: 14px; color: var(--text); }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 120px; margin-bottom: 8px; }
+    .bar-col { display: flex; flex-direction: column; align-items: center; flex: 1; height: 100%; justify-content: flex-end; gap: 4px; }
+    .bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 4px; transition: opacity .2s; }
+    .bar-gym  { background: var(--accent); }
+    .bar-run  { background: var(--green); }
+    .bar-label { font-size: 10px; color: var(--muted); white-space: nowrap; }
+    .bar-val   { font-size: 11px; color: var(--text); font-weight: 600; }
+
+    /* Table */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0 24px; }
+    th { text-align: left; padding: 9px 12px; background: var(--surface2); color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .07em; border-bottom: 1px solid var(--border); }
+    td { padding: 9px 12px; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface); }
+    .badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 99px; }
+    .badge-green  { background: #1a3a28; color: var(--green); }
+    .badge-blue   { background: #1a2a4a; color: var(--accent); }
+    .badge-yellow { background: #3a2e10; color: var(--yellow); }
+    .badge-red    { background: #3a1a20; color: var(--red); }
+    .badge-purple { background: #2a1f4a; color: var(--purple); }
+
+    /* Progress bar inline */
+    .prog-wrap { display: flex; align-items: center; gap: 10px; }
+    .prog-bar { flex: 1; height: 6px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+    .prog-fill { height: 100%; border-radius: 99px; }
+
+    /* Callout */
+    .callout { border-left: 3px solid var(--accent); background: var(--surface); border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 16px 0; font-size: 13.5px; }
+    .callout.warn { border-color: var(--yellow); }
+    .callout.good { border-color: var(--green); }
+    .callout.bad  { border-color: var(--red); }
+    .callout strong { color: var(--text); }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media(max-width:640px) { .two-col { grid-template-columns: 1fr; } }
+
+    .section-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+    .trend-up   { color: var(--green); }
+    .trend-down { color: var(--red); }
+    .muted { color: var(--muted); }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>Trainingsanalyse</h1>
+  <p class="subtitle">August 2025 – April 2026 &nbsp;·&nbsp; Gym &amp; Laufen &nbsp;·&nbsp; Stand: 12.04.2026</p>
+
+  <!-- ── OVERVIEW STATS ── -->
+  <div class="stat-grid">
+    <div class="stat-card"><div class="val val-blue">47</div><div class="lbl">Gym-Einheiten</div></div>
+    <div class="stat-card"><div class="val val-green">11</div><div class="lbl">Laufeinheiten</div></div>
+    <div class="stat-card"><div class="val val-yellow">74,6 km</div><div class="lbl">Gelaufene Distanz</div></div>
+    <div class="stat-card"><div class="val val-purple">90 kg</div><div class="lbl">Peak Bankdrücken</div></div>
+    <div class="stat-card"><div class="val val-red">7 Wo.</div><div class="lbl">Verletzungspause</div></div>
+    <div class="stat-card"><div class="val val-green">6:03</div><div class="lbl">Beste Pace /km</div></div>
+  </div>
+
+  <!-- ── TIMELINE ── -->
+  <h2>Zeitlinie</h2>
+  <div class="timeline">
+    <div class="tl-item active">
+      <div class="tl-date">August 2025</div>
+      <div class="tl-text">Start des Analysezeitraums — 8 Gym-Einheiten, Bankdrücken auf 85 kg stabil. Laufen noch nicht aktiv.</div>
+    </div>
+    <div class="tl-item active">
+      <div class="tl-date">September 2025</div>
+      <div class="tl-text"><strong>Persönlicher Peak:</strong> Bankdrücken 90 kg (2×4, 1×3). 4 Gym-Einheiten.</div>
+    </div>
+    <div class="tl-item active">
+      <div class="tl-date">Oktober 2025</div>
+      <div class="tl-text">Nur 2 Gym-Einheiten — Frequenzeinbruch. Gewichte reduziert auf 70 kg. Erste Anzeichen nachlassender Intensität.</div>
+    </div>
+    <div class="tl-item active">
+      <div class="tl-date">November 2025</div>
+      <div class="tl-text">Comeback: 8 Gym-Einheiten — stärkster Trainingsmonat. Bankdrücken wieder bei 80–85 kg. Laufen beginnt.</div>
+    </div>
+    <div class="tl-item active">
+      <div class="tl-date">Dezember 2025</div>
+      <div class="tl-text">6 Gym-Einheiten. Laufen sehr aktiv: Läufe bis 9,95 km. Bankdrücken bei 85 kg.</div>
+    </div>
+    <div class="tl-item active">
+      <div class="tl-date">Januar 2026</div>
+      <div class="tl-text"><strong>Aktivster Monat:</strong> 11 Gym-Einheiten, Longest Run 15,03 km. Bankdrücken 85 kg stabil.</div>
+    </div>
+    <div class="tl-item injury">
+      <div class="tl-date">Anfang Februar 2026</div>
+      <div class="tl-text"><strong>Hexenschuss.</strong> Komplette Trainingspause. 7 Wochen ohne Belastung. Physiotherapie bei Emilia (Physiovital Aachen).</div>
+    </div>
+    <div class="tl-item comeback">
+      <div class="tl-date">11. Februar 2026</div>
+      <div class="tl-text">Erstes Training nach Bandscheibenvorfall — extrem leicht, Rücken testen.</div>
+    </div>
+    <div class="tl-item comeback">
+      <div class="tl-date">März 2026</div>
+      <div class="tl-text"><strong>Wiederaufbau:</strong> 5 Einheiten. Bankdrücken startet bei 20 kg, endet bei 80×8. Strukturierter Aufbau.</div>
+    </div>
+    <div class="tl-item active">
+      <div class="tl-date">April 2026</div>
+      <div class="tl-text">2 Einheiten + erster Comeback-Lauf (5,14 km). Erster Beinstrecker. Bankdrücken 80 kg 3×8 stabil. Kurs stimmt.</div>
+    </div>
+  </div>
+
+  <!-- ── GYM SECTION ── -->
+  <h2>Gym</h2>
+
+  <h3>Einheiten pro Monat</h3>
+  <div class="bar-chart">
+    <div class="bar-col"><div class="bar-val">8</div><div class="bar bar-gym" style="height:69%"></div><div class="bar-label">Aug</div></div>
+    <div class="bar-col"><div class="bar-val">4</div><div class="bar bar-gym" style="height:34%"></div><div class="bar-label">Sep</div></div>
+    <div class="bar-col"><div class="bar-val">2</div><div class="bar bar-gym" style="height:17%"></div><div class="bar-label">Okt</div></div>
+    <div class="bar-col"><div class="bar-val">8</div><div class="bar bar-gym" style="height:69%"></div><div class="bar-label">Nov</div></div>
+    <div class="bar-col"><div class="bar-val">6</div><div class="bar bar-gym" style="height:52%"></div><div class="bar-label">Dez</div></div>
+    <div class="bar-col"><div class="bar-val">11</div><div class="bar bar-gym" style="height:95%"></div><div class="bar-label">Jan</div></div>
+    <div class="bar-col"><div class="bar-val">1</div><div class="bar bar-gym" style="height:8%; background: var(--red)"></div><div class="bar-label">Feb</div></div>
+    <div class="bar-col"><div class="bar-val">5</div><div class="bar bar-gym" style="height:43%; background: var(--yellow)"></div><div class="bar-label">Mär</div></div>
+    <div class="bar-col"><div class="bar-val">2</div><div class="bar bar-gym" style="height:17%; background: var(--green)"></div><div class="bar-label">Apr</div></div>
+  </div>
+
+  <h3>Bankdrücken — Progression</h3>
+  <table>
+    <thead><tr><th>Datum</th><th>Aufwärmen</th><th>Arbeitssatz</th><th>Notiz</th></tr></thead>
+    <tbody>
+      <tr><td>05.08.2025</td><td>60 kg</td><td>70 kg × 2×8</td><td class="muted">Einstieg</td></tr>
+      <tr><td>08.08.2025</td><td>60 kg</td><td>80 kg × 2×7, 1×5</td><td class="muted"></td></tr>
+      <tr><td>16.08.2025</td><td>60 kg</td><td>80 kg × 2×8, 1×5</td><td class="muted"></td></tr>
+      <tr><td>20.08.2025</td><td>60 kg</td><td>80 kg × 1×8, 1×7, 1×6</td><td class="muted"></td></tr>
+      <tr><td>26.08.2025</td><td>60 kg</td><td>80 kg × 2×8, 1×6</td><td class="muted"></td></tr>
+      <tr><td>29.08.2025</td><td>60 kg</td><td>85 kg × 1×6, 1×5, 1×6</td><td class="muted"></td></tr>
+      <tr><td>06.09.2025</td><td>60 kg</td><td>85 kg × 1×8, 1×6, 1×4</td><td class="muted"></td></tr>
+      <tr><td>10.09.2025</td><td>60 kg</td><td><strong>90 kg × 2×4, 80 kg × 1×8</strong></td><td><span class="badge badge-purple">Peak 1</span></td></tr>
+      <tr><td>14.09.2025</td><td>60+80 kg</td><td><strong>90 kg × 2×4, 80 kg × 1×10</strong></td><td><span class="badge badge-purple">Peak 2 — 80 kg × 10!</span></td></tr>
+      <tr><td>25.09.2025</td><td>60 kg</td><td>80 kg × 1×8, 1×6, 1×5</td><td class="muted"></td></tr>
+      <tr><td>22.10.2025</td><td>60 kg</td><td>70 kg × 2×8, 1×7</td><td><span class="badge badge-yellow">Rückgang</span></td></tr>
+      <tr><td>27.10.2025</td><td>60 kg</td><td>70 kg × 4×8</td><td class="muted"></td></tr>
+      <tr><td>03.11.2025</td><td>60 kg</td><td>80 kg × 2×6, 1×5</td><td class="muted">Comeback</td></tr>
+      <tr><td>10.11.2025</td><td>60 kg</td><td>80 kg × 2×6, 1×4</td><td class="muted"></td></tr>
+      <tr><td>17.11.2025</td><td>60 kg</td><td>80 kg × 1×7, 1×6, 1×5</td><td class="muted"></td></tr>
+      <tr><td>20.11.2025</td><td>60 kg</td><td>80 kg × 1×8, 1×6, 1×5</td><td class="muted"></td></tr>
+      <tr><td>10.12.2025</td><td>60 kg</td><td>85 kg × 1×7, 1×6, 1×4</td><td class="muted"></td></tr>
+      <tr><td>17.12.2025</td><td>70 kg</td><td>85 kg × 1×8, 1×6+1</td><td class="muted"></td></tr>
+      <tr><td>06.01.2026</td><td>60 kg</td><td>80 kg × 1×8, 1×6, 1×5</td><td class="muted"></td></tr>
+      <tr><td>10.01.2026</td><td>60 kg</td><td>80 kg × 1×8, 1×7, 1×4</td><td><span class="badge badge-yellow">Fast abwerfen</span></td></tr>
+      <tr><td>13.01.2026</td><td>60 kg</td><td>85 kg × 1×7, 2×4</td><td class="muted"></td></tr>
+      <tr><td>18.01.2026</td><td>40+60 kg</td><td>85 kg × 1×5, 1×4, 1×3</td><td class="muted">Vor Hexenschuss</td></tr>
+      <tr><td>22.01.2026</td><td>60 kg</td><td>85 kg × 1×5, 80 kg × 1×5</td><td><span class="badge badge-red">Letzte Einheit vor Pause</span></td></tr>
+      <tr><td colspan="4" style="background:rgba(224,92,110,0.08); color:var(--red); text-align:center; font-size:13px; padding: 10px;">⛔ Hexenschuss — 7 Wochen Pause</td></tr>
+      <tr><td>03.03.2026</td><td>20+40 kg</td><td>60 kg × 2×8</td><td><span class="badge badge-yellow">Wiederaufbau</span></td></tr>
+      <tr><td>09.03.2026</td><td>—</td><td>60 kg × 1×6, 1×8</td><td class="muted"></td></tr>
+      <tr><td>23.03.2026</td><td>60+70 kg</td><td>80 kg × 1×5, 1×4</td><td class="muted"></td></tr>
+      <tr><td>27.03.2026</td><td>60+70 kg</td><td>80 kg × 1×8, 1×5</td><td><span class="badge badge-green">80 kg × 8 zurück!</span></td></tr>
+      <tr><td>04.04.2026</td><td>60 kg</td><td>80 kg × 2×8, 1×5</td><td class="muted"></td></tr>
+      <tr><td>08.04.2026</td><td>60 kg</td><td>80 kg × 2×8, 1×6</td><td><span class="badge badge-green">Solide</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="two-col">
+    <div>
+      <h3>Wichtigste Übungen — Höchstleistungen</h3>
+      <div class="section-box">
+        <table style="margin:0">
+          <thead><tr><th>Übung</th><th>Bestes Gewicht</th><th>Stand</th></tr></thead>
+          <tbody>
+            <tr><td>Bankdrücken</td><td><strong>90 kg</strong></td><td><span class="badge badge-purple">Sep 2025</span></td></tr>
+            <tr><td>Butterfly Maschine</td><td><strong>103 kg</strong></td><td><span class="badge badge-blue">Aug 2025</span></td></tr>
+            <tr><td>Latzug (breit)</td><td><strong>80 kg × 2×8</strong></td><td><span class="badge badge-blue">Dez 2025</span></td></tr>
+            <tr><td>Klimmzug (Zusatzgewicht)</td><td><strong>+40 kg × 10</strong></td><td><span class="badge badge-blue">Dez 2025</span></td></tr>
+            <tr><td>Rudern (Maschine)</td><td><strong>70 kg × 2×8</strong></td><td><span class="badge badge-blue">Dez 2025</span></td></tr>
+            <tr><td>Schulterpresse</td><td><strong>50 kg × 1×8</strong></td><td><span class="badge badge-blue">Jan 2026</span></td></tr>
+            <tr><td>Hackenschmidt</td><td><strong>40 kg × 2×8</strong></td><td><span class="badge badge-blue">Nov 2025</span></td></tr>
+            <tr><td>Wadenpresse</td><td><strong>113 kg × 1×11</strong></td><td><span class="badge badge-blue">Nov 2025</span></td></tr>
+            <tr><td>Beinstrecker</td><td><strong>85 kg × 1×8</strong></td><td><span class="badge badge-green">Apr 2026</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <h3>Comeback-Progression März–April 2026</h3>
+      <div class="section-box">
+        <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">Bankdrücken Arbeitssatz seit Wiederaufnahme</p>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div><div style="font-size:12px; color:var(--muted); margin-bottom:3px;">03.03 — 60 kg × 2×8</div><div class="prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:67%; background:var(--yellow)"></div></div><span style="font-size:12px">67%</span></div></div>
+          <div><div style="font-size:12px; color:var(--muted); margin-bottom:3px;">09.03 — 60 kg × 1×6–8</div><div class="prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:67%; background:var(--yellow)"></div></div><span style="font-size:12px">67%</span></div></div>
+          <div><div style="font-size:12px; color:var(--muted); margin-bottom:3px;">23.03 — 80 kg × 1×5</div><div class="prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:89%; background:var(--accent)"></div></div><span style="font-size:12px">89%</span></div></div>
+          <div><div style="font-size:12px; color:var(--muted); margin-bottom:3px;">27.03 — 80 kg × 1×8</div><div class="prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:89%; background:var(--accent)"></div></div><span style="font-size:12px">89%</span></div></div>
+          <div><div style="font-size:12px; color:var(--muted); margin-bottom:3px;">04.04 — 80 kg × 2×8, 1×5</div><div class="prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:89%; background:var(--green)"></div></div><span style="font-size:12px">89%</span></div></div>
+          <div><div style="font-size:12px; color:var(--muted); margin-bottom:3px;">08.04 — 80 kg × 2×8, 1×6</div><div class="prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:89%; background:var(--green)"></div></div><span style="font-size:12px">89%</span></div></div>
+          <div style="margin-top:8px; padding-top:10px; border-top:1px solid var(--border);"><div style="font-size:12px; color:var(--muted); margin-bottom:3px;">Ziel: 85 kg × 3×8</div><div class="prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:100%; background:var(--purple); opacity:.4"></div></div><span style="font-size:12px">Ziel</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout warn" style="margin-top:24px;">
+    <strong>Einbruch Oktober 2025:</strong> Nur 2 Einheiten, Gewichte auf 70 kg reduziert. Wahrscheinlich erster Rücken-Vorbote oder äußere Faktoren. Im Nachhinein passt das zur Verletzung im Februar.
+  </div>
+  <div class="callout good">
+    <strong>Comeback-Tempo:</strong> Von 60 kg (03.03.) auf 80 kg × 3 Sätze in unter 6 Wochen. Muskelgedächtnis voll aktiv — Basis ist da. 85 kg als nächster Meilenstein ist realistisch in 3–4 Wochen.
+  </div>
+
+  <!-- ── LAUFEN SECTION ── -->
+  <h2>Laufen</h2>
+
+  <div class="stat-grid">
+    <div class="stat-card"><div class="val val-green">74,6 km</div><div class="lbl">Gesamt</div></div>
+    <div class="stat-card"><div class="val val-blue">11</div><div class="lbl">Läufe</div></div>
+    <div class="stat-card"><div class="val val-yellow">6:47</div><div class="lbl">Ø Pace /km</div></div>
+    <div class="stat-card"><div class="val val-green">6:03</div><div class="lbl">Beste Pace</div></div>
+    <div class="stat-card"><div class="val val-purple">15,03 km</div><div class="lbl">Längster Lauf</div></div>
+    <div class="stat-card"><div class="val val-blue">7.461 kcal</div><div class="lbl">Kalorien gesamt</div></div>
+  </div>
+
+  <h3>Alle Läufe</h3>
+  <table>
+    <thead><tr><th>Datum</th><th>Distanz</th><th>Zeit</th><th>Pace /km</th><th>Ø HR</th><th>Max HR</th><th>Kalorien</th><th></th></tr></thead>
+    <tbody>
+      <tr><td>03.12.2025</td><td>2,0 km</td><td>102:13</td><td class="muted">Spaziergang</td><td>99</td><td>141</td><td>601</td><td><span class="badge badge-yellow">Einlaufen</span></td></tr>
+      <tr><td>04.12.2025</td><td>6,26 km</td><td>39:45</td><td>6:20</td><td>150</td><td>165</td><td>634</td><td><span class="badge badge-blue">Erster echter Lauf</span></td></tr>
+      <tr><td>09.12.2025</td><td>7,33 km</td><td>48:24</td><td>6:36</td><td>152</td><td>171</td><td>695</td><td></td></tr>
+      <tr><td>30.12.2025</td><td>4,38 km</td><td>26:33</td><td><strong class="trend-up">6:03</strong></td><td>145</td><td>155</td><td>396</td><td><span class="badge badge-green">Beste Pace</span></td></tr>
+      <tr><td>31.12.2025</td><td>9,95 km</td><td>66:15</td><td>6:39</td><td>159</td><td>170</td><td>938</td><td><span class="badge badge-blue">Erster ~10km</span></td></tr>
+      <tr><td>03.01.2026</td><td>6,38 km</td><td>47:02</td><td>7:22</td><td>155</td><td>169</td><td>714</td><td></td></tr>
+      <tr><td>07.01.2026</td><td>6,85 km</td><td>44:39</td><td>6:31</td><td>152</td><td>167</td><td>686</td><td></td></tr>
+      <tr><td>13.01.2026</td><td>7,59 km</td><td>51:43</td><td>6:48</td><td>150</td><td>169</td><td>732</td><td></td></tr>
+      <tr><td>19.01.2026</td><td>7,66 km</td><td>47:26</td><td>6:11</td><td>147</td><td>167</td><td>686</td><td></td></tr>
+      <tr><td>23.01.2026</td><td><strong>15,03 km</strong></td><td>96:46</td><td>6:26</td><td>146</td><td>164</td><td><strong>1342</strong></td><td><span class="badge badge-purple">Längster Lauf</span></td></tr>
+      <tr><td colspan="8" style="background:rgba(224,92,110,0.08); color:var(--red); text-align:center; font-size:13px; padding:10px;">⛔ Hexenschuss — Laufpause Feb–Mär 2026</td></tr>
+      <tr><td>07.04.2026</td><td>5,14 km</td><td>33:04</td><td>6:26</td><td>157</td><td>179</td><td>464</td><td><span class="badge badge-green">Comeback-Lauf</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Lauf-Distanzen im Zeitverlauf</h3>
+  <div class="bar-chart" style="height:100px">
+    <div class="bar-col"><div class="bar-val" style="font-size:10px">2,0</div><div class="bar bar-run" style="height:13%"></div><div class="bar-label">03.12</div></div>
+    <div class="bar-col"><div class="bar-val" style="font-size:10px">6,3</div><div class="bar bar-run" style="height:42%"></div><div class="bar-label">04.12</div></div>
+    <div class="bar-col"><div class="bar-val" style="font-size:10px">7,3</div><div class="bar bar-run" style="height:49%"></div><div class="bar-label">09.12</div></div>
+    <div class="bar-col"><div class="bar-val" style="font-size:10px">4,4</div><div class="bar bar-run" style="height:29%"></div><div class="bar-label">30.12</div></div>
+    <div class="bar-col"><div class="bar-val" style="font-size:10px">9,95</div><div class="bar bar-run" style="height:66%"></div><div class="bar-label">31.12</div></div>
+    <div class="bar-col"><div class="bar-val" style="font-size:10px">6,4</div><div class="bar bar-run" style="height:43%"></div><div class="bar-label">03.01</div></div>
+    <div class="bar-col"><div class="bar-val" style="font-size:10px">6,9</div><div class="bar bar-run" style="height:46%"></div><div class="bar-label">07.01</div></div>
+    <div class="bar-col"><div class="bar-val" style="font-size:10px">7,6</div><div class="bar bar-run" style="height:51%"></div><div class="bar-label">13.01</div></div>
+    <div class="bar-col"><div class="bar-val" style="font-size:10px">7,7</div><div class="bar bar-run" style="height:51%"></div><div class="bar-label">19.01</div></div>
+    <div class="bar-col"><div class="bar-val" style="font-size:10px">15,0</div><div class="bar bar-run" style="height:100%; background:var(--purple)"></div><div class="bar-label">23.01</div></div>
+    <div class="bar-col"><div class="bar-val" style="font-size:10px">—</div><div class="bar" style="height:4%; background:var(--red)"></div><div class="bar-label">Feb-Mär</div></div>
+    <div class="bar-col"><div class="bar-val" style="font-size:10px">5,1</div><div class="bar bar-run" style="height:34%; background:var(--green)"></div><div class="bar-label">07.04</div></div>
+  </div>
+
+  <div class="callout good" style="margin-top:20px;">
+    <strong>Comeback-Lauf 07.04.:</strong> 5,14 km @ 6:26/km — solide Pace für den ersten Lauf nach 10 Wochen Pause. Herzfrequenz etwas erhöht (Ø 157, Max 179), was normal ist. Kondition baut sich schnell wieder auf.
+  </div>
+  <div class="callout">
+    <strong>Pace-Entwicklung:</strong> Von 6:20 (erster Lauf, Dez) auf 6:03 (beste Pace, kurze Distanz). Über längere Distanzen stabil bei 6:26–6:39. Mit regelmäßigem Training ist 6:00/km auf 10 km in 6–8 Wochen realistisch.
+  </div>
+
+  <!-- ── FAZIT ── -->
+  <h2>Fazit &amp; Ausblick</h2>
+  <div class="two-col">
+    <div class="section-box">
+      <h3 style="margin-top:0">Stärken</h3>
+      <ul style="list-style:none; display:flex; flex-direction:column; gap:8px; font-size:13.5px;">
+        <li>✅ Schnelles Muskelgedächtnis — 80 kg in 6 Wochen nach Hexenschuss</li>
+        <li>✅ Hohe Laufmotivation — von 0 auf 15 km in 7 Wochen (Dez–Jan)</li>
+        <li>✅ Konsistenz: Nov/Jan stark mit 8–11 Einheiten/Monat</li>
+        <li>✅ Erste Beinübungen zurück (Beinstrecker) ohne Probleme</li>
+        <li>✅ Physio läuft — strukturierter Wiederaufbau</li>
+      </ul>
+    </div>
+    <div class="section-box">
+      <h3 style="margin-top:0">Baustellen</h3>
+      <ul style="list-style:none; display:flex; flex-direction:column; gap:8px; font-size:13.5px;">
+        <li>⚠️ Bankdrücken noch 5 kg unter Pre-Injury Peak (80 vs. 85 kg)</li>
+        <li>⚠️ Oktober-Einbruch zeigt: ohne Struktur fällt Frequenz schnell</li>
+        <li>⚠️ Laufen noch auf 5 km beschränkt — Rücken braucht mehr Tests</li>
+        <li>⚠️ Kein systematisches Beintraining seit Monaten</li>
+        <li>⚠️ Einheitenfrequenz April noch niedrig (2 bisher)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Nächste Meilensteine</h3>
+  <table>
+    <thead><tr><th>Ziel</th><th>Aktuell</th><th>Zielwert</th><th>Zeitrahmen</th></tr></thead>
+    <tbody>
+      <tr><td>Bankdrücken Pre-Injury</td><td>80 kg × 3×8</td><td>85 kg × 3×8</td><td><span class="badge badge-yellow">~3–4 Wochen</span></td></tr>
+      <tr><td>Bankdrücken neuer Peak</td><td>80 kg</td><td>90+ kg</td><td><span class="badge badge-blue">~3 Monate</span></td></tr>
+      <tr><td>Laufen 10 km</td><td>5 km</td><td>10 km @ 6:30</td><td><span class="badge badge-yellow">~4–6 Wochen</span></td></tr>
+      <tr><td>Beintraining etabliert</td><td>Beinstrecker ✓</td><td>Voll integriert</td><td><span class="badge badge-blue">~4 Wochen</span></td></tr>
+      <tr><td>Körpergewicht</td><td>~99 kg</td><td>&lt; 90 kg</td><td><span class="badge badge-blue">~6 Monate</span></td></tr>
+      <tr><td>AW-Verein zurück</td><td>Pause</td><td>KW17 (So 19.04.)</td><td><span class="badge badge-green">Diese Woche</span></td></tr>
+    </tbody>
+  </table>
+
+  <hr style="border:none; border-top:1px solid var(--border); margin: 40px 0 20px"/>
+  <p style="font-size:12px; color:var(--muted); text-align:center;">Analyse erstellt mit Claude Code &nbsp;·&nbsp; April 2026 &nbsp;·&nbsp; Daten: 47 Gym-Einheiten + 11 Läufe</p>
+
+</div>
+</body>
+</html>

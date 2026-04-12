@@ -1,0 +1,23 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Garmin Sync
+.garmin_sync_state.json
+.garmin_session.pkl
+
+# Rohdaten (bleiben lokal)
+imports/
+
+# macOS
+.DS_Store
+.AppleDouble
+
+# Editor
+.idea/
+.vscode/
+
+# Secrets
+.env

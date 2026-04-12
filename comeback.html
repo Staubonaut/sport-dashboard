@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Comeback Tracker</title>
+<style>
+:root {
+  --bg:#0f1117; --s1:#1a1d27; --s2:#22263a; --border:#2e3348;
+  --blue:#4f8ef7; --green:#34c77b; --yellow:#f7c948; --red:#e05c6e; --purple:#a78bfa;
+  --text:#e4e6f0; --muted:#7a7f9a;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;font-size:15px;line-height:1.6;padding:32px 20px 80px;}
+.wrap{max-width:960px;margin:0 auto;}
+
+/* ── HERO ── */
+.hero{display:grid;grid-template-columns:200px 1fr;gap:32px;align-items:center;margin-bottom:48px;}
+@media(max-width:640px){.hero{grid-template-columns:1fr;}}
+.ring-wrap{position:relative;width:180px;height:180px;margin:0 auto;}
+.ring-wrap svg{transform:rotate(-90deg);}
+.ring-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+.ring-pct{font-size:36px;font-weight:800;color:var(--green);}
+.ring-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+.hero-right h1{font-size:26px;font-weight:700;margin-bottom:6px;}
+.hero-right p{color:var(--muted);font-size:14px;margin-bottom:20px;}
+.hero-stats{display:flex;flex-wrap:wrap;gap:12px;}
+.hstat{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:12px 16px;min-width:110px;}
+.hstat .v{font-size:22px;font-weight:700;}
+.hstat .l{font-size:11px;color:var(--muted);}
+.col-g{color:var(--green);} .col-b{color:var(--blue);} .col-y{color:var(--yellow);} .col-p{color:var(--purple);}
+
+/* ── SECTION ── */
+h2{font-size:16px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:40px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+
+/* ── EXERCISE CARDS ── */
+.ex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-bottom:8px;}
+.ex-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:border-color .2s,background .2s;}
+.ex-card:hover{background:var(--s2);}
+.ex-card.active{border-color:var(--blue);background:var(--s2);}
+.ex-card .name{font-size:13px;font-weight:600;margin-bottom:4px;}
+.ex-card .cur{font-size:20px;font-weight:700;margin-bottom:2px;}
+.ex-card .pre{font-size:11px;color:var(--muted);}
+.ex-card .prog{margin-top:10px;height:4px;background:var(--s2);border-radius:99px;overflow:hidden;}
+.ex-card .prog-fill{height:100%;border-radius:99px;background:var(--green);transition:width .6s ease;}
+.sparkline{margin-top:8px;}
+
+/* ── MAIN CHART ── */
+.chart-box{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px;}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+.chart-title{font-size:16px;font-weight:600;}
+.chart-legend{display:flex;gap:16px;font-size:12px;color:var(--muted);}
+.leg-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;}
+.toggle-wrap{display:flex;gap:6px;}
+.toggle-btn{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--muted);cursor:pointer;transition:.15s;}
+.toggle-btn.on{background:var(--blue);border-color:var(--blue);color:#fff;}
+canvas{display:block;width:100%;}
+
+/* ── PROJECTION ── */
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:8px;}
+.proj-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.proj-card h4{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px;}
+.proj-card .target{font-size:20px;font-weight:700;margin-bottom:4px;}
+.proj-card .eta{font-size:13px;color:var(--muted);}
+.proj-bar{height:6px;background:var(--s2);border-radius:99px;overflow:hidden;margin:10px 0 6px;}
+.proj-fill{height:100%;border-radius:99px;}
+.proj-steps{font-size:12px;color:var(--muted);margin-top:8px;display:flex;flex-direction:column;gap:3px;}
+
+/* ── FREQ ── */
+.freq-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:6px;margin-bottom:16px;}
+.freq-col{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.freq-bar-wrap{height:80px;display:flex;align-items:flex-end;}
+.freq-bar{width:28px;border-radius:4px 4px 0 0;min-height:4px;transition:.4s ease;}
+.freq-kw{font-size:10px;color:var(--muted);}
+.freq-n{font-size:11px;font-weight:600;}
+
+/* ── CALLOUT ── */
+.callout{border-left:3px solid var(--blue);background:var(--s1);border-radius:0 8px 8px 0;padding:12px 16px;margin:16px 0;font-size:13.5px;}
+.callout.good{border-color:var(--green);}
+.callout.warn{border-color:var(--yellow);}
+strong{color:var(--text);}
+
+/* ── TOOLTIP ── */
+#tooltip{position:fixed;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;pointer-events:none;display:none;z-index:99;}
+#tooltip .t-val{font-size:17px;font-weight:700;margin-bottom:2px;}
+#tooltip .t-lbl{color:var(--muted);font-size:11px;}
+</style>
+</head>
+<body>
+<div id="tooltip"><div class="t-val" id="tt-val"></div><div class="t-lbl" id="tt-lbl"></div></div>
+<div class="wrap">
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="ring-wrap">
+    <svg width="180" height="180" viewBox="0 0 180 180">
+      <circle cx="90" cy="90" r="76" fill="none" stroke="#2e3348" stroke-width="14"/>
+      <circle cx="90" cy="90" r="76" fill="none" stroke="#34c77b" stroke-width="14"
+        stroke-linecap="round"
+        stroke-dasharray="477.5"
+        stroke-dashoffset="57.3"
+        id="ringFill" style="transition:stroke-dashoffset 1.5s ease"/>
+    </svg>
+    <div class="ring-center">
+      <div class="ring-pct" id="ringPct">0%</div>
+      <div class="ring-lbl">Recovery</div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <h1>Du bist zurück. 💪</h1>
+    <p>Comeback nach Hexenschuss · Erster Trainingstag: 11. Februar 2026</p>
+    <div class="hero-stats">
+      <div class="hstat"><div class="v col-g" id="dayCount">0</div><div class="l">Tage seit Comeback</div></div>
+      <div class="hstat"><div class="v col-b">8</div><div class="l">Einheiten seitdem</div></div>
+      <div class="hstat"><div class="v col-y">80 kg</div><div class="l">Bench aktuell</div></div>
+      <div class="hstat"><div class="v col-p">85 kg</div><div class="l">Pre-Injury Bench</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── EXERCISE OVERVIEW ── -->
+<h2>Übungen — Comeback-Stand</h2>
+<div class="ex-grid" id="exGrid"></div>
+
+<!-- ── MAIN CHART ── -->
+<h2>Detailansicht</h2>
+<div class="chart-box">
+  <div class="chart-header">
+    <span class="chart-title" id="chartTitle">Bankdrücken</span>
+    <div class="chart-legend">
+      <span><span class="leg-dot" style="background:var(--blue)"></span>Ist</span>
+      <span><span class="leg-dot" style="background:var(--purple);opacity:.7"></span>Projektion</span>
+      <span><span class="leg-dot" style="background:var(--yellow)"></span>Pre-Injury</span>
+      <span><span class="leg-dot" style="background:var(--red)"></span>Peak</span>
+    </div>
+    <div class="toggle-wrap">
+      <button class="toggle-btn on" id="btnKg" onclick="setMode('kg')">Gewicht</button>
+      <button class="toggle-btn" id="btnVol" onclick="setMode('vol')">Volumen</button>
+    </div>
+  </div>
+  <canvas id="mainChart" height="280"></canvas>
+</div>
+
+<!-- ── PROJECTION ── -->
+<h2>Projektion</h2>
+<div class="proj-grid" id="projGrid"></div>
+
+<!-- ── FREQUENCY ── -->
+<h2>Trainingsfrequenz — Wochen seit Comeback</h2>
+<div class="freq-grid" id="freqGrid"></div>
+<div class="callout good">
+  <strong>Trend:</strong> Von 1 Einheit/Woche (Feb/Mär) auf 2 Einheiten/Woche (KW13–14). Ab dieser Woche mit 3 geplanten Einheiten (Mo Push, Di Pull + AW So) wird die Zielfrequenz von 4×/Woche greifbar.
+</div>
+<div class="callout warn">
+  <strong>KW12 (16.–22. März):</strong> Null Einheiten — Lücke im Aufbau. Passiert. Wichtig ist, dass danach wieder Gas gegeben wurde.
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+// ────────────────────────────────────────────
+// DATA
+// ────────────────────────────────────────────
+
+const EXERCISES = {
+  bench: {
+    name: "Bankdrücken",
+    unit: "kg",
+    preInjury: 85,
+    peak: 90,
+    color: "#4f8ef7",
+    data: [
+      { date:"03.03", kg:60,  reps:[8,8],    sets:2, note:"Wiederaufbau" },
+      { date:"09.03", kg:60,  reps:[6,8],    sets:2, note:"" },
+      { date:"23.03", kg:80,  reps:[5,4],    sets:2, note:"Großer Sprung!" },
+      { date:"27.03", kg:80,  reps:[8,5],    sets:2, note:"80×8 zurück" },
+      { date:"04.04", kg:80,  reps:[8,8,5],  sets:3, note:"3 Sätze" },
+      { date:"08.04", kg:80,  reps:[9,8,8,6],sets:4, note:"Inkl. 60kg Aufwärmen" },
+    ],
+    projection: [
+      { date:"13.04", kg:80,  proj:true },
+      { date:"20.04", kg:82.5,proj:true },
+      { date:"27.04", kg:85,  proj:true },
+      { date:"04.05", kg:87.5,proj:true },
+    ]
+  },
+  butterfly: {
+    name: "Butterfly",
+    unit: "kg",
+    preInjury: 103,
+    peak: 103,
+    color: "#e05c6e",
+    data: [
+      { date:"03.03", kg:20,  reps:[6,5,5], sets:3, note:"Sehr leicht" },
+      { date:"23.03", kg:60,  reps:[12,9,7],sets:3, note:"" },
+      { date:"27.03", kg:85,  reps:[7,6],   sets:2, note:"85 kg direkt!" },
+      { date:"04.04", kg:65,  reps:[6,6],   sets:2, note:"Schulterprobleme" },
+      { date:"08.04", kg:85,  reps:[8,5],   sets:2, note:"77 kg +2 Sätze" },
+    ],
+    projection: [
+      { date:"13.04", kg:85,  proj:true },
+      { date:"20.04", kg:90,  proj:true },
+      { date:"27.04", kg:95,  proj:true },
+      { date:"11.05", kg:103, proj:true },
+    ]
+  },
+  latzug: {
+    name: "Latzug",
+    unit: "kg",
+    preInjury: 80,
+    peak: 80,
+    color: "#34c77b",
+    data: [
+      { date:"03.03", kg:40,  reps:[12],    sets:1, note:"" },
+      { date:"09.03", kg:59,  reps:[6,8],   sets:2, note:"" },
+      { date:"23.03", kg:60,  reps:[8,8,8], sets:3, note:"" },
+      { date:"27.03", kg:65,  reps:[9,8],   sets:2, note:"" },
+      { date:"30.03", kg:70,  reps:[10,7],  sets:2, note:"70 kg" },
+    ],
+    projection: [
+      { date:"13.04", kg:70,  proj:true },
+      { date:"20.04", kg:73,  proj:true },
+      { date:"27.04", kg:75,  proj:true },
+      { date:"11.05", kg:80,  proj:true },
+    ]
+  },
+  rudern: {
+    name: "Rudern",
+    unit: "kg",
+    preInjury: 70,
+    peak: 70,
+    color: "#f7c948",
+    data: [
+      { date:"03.03", kg:50,  reps:[8,8],  sets:2, note:"" },
+      { date:"23.03", kg:60,  reps:[12,12],sets:2, note:"" },
+      { date:"27.03", kg:60,  reps:[8,8,8],sets:3, note:"" },
+      { date:"30.03", kg:65,  reps:[10,8], sets:2, note:"" },
+    ],
+    projection: [
+      { date:"13.04", kg:65,  proj:true },
+      { date:"20.04", kg:68,  proj:true },
+      { date:"27.04", kg:70,  proj:true },
+    ]
+  },
+  laufen: {
+    name: "Laufen",
+    unit: "km",
+    preInjury: 10,
+    peak: 15.03,
+    color: "#a78bfa",
+    data: [
+      { date:"07.04", kg:5.14, reps:[1], sets:1, note:"6:26/km · HR 157" },
+    ],
+    projection: [
+      { date:"14.04", kg:5,   proj:true },
+      { date:"18.04", kg:5,   proj:true },
+      { date:"25.04", kg:7,   proj:true },
+      { date:"02.05", kg:8,   proj:true },
+      { date:"16.05", kg:10,  proj:true },
+    ]
+  }
+};
+
+const FREQ = [
+  { kw:"KW07", n:1, date:"09.02" },
+  { kw:"KW08", n:0, date:"16.02" },
+  { kw:"KW09", n:0, date:"23.02" },
+  { kw:"KW10", n:1, date:"02.03" },
+  { kw:"KW11", n:1, date:"09.03" },
+  { kw:"KW12", n:0, date:"16.03" },
+  { kw:"KW13", n:2, date:"23.03" },
+  { kw:"KW14", n:2, date:"30.03" },
+  { kw:"KW15", n:3, date:"06.04", projected:true },
+];
+
+// ────────────────────────────────────────────
+// STATE
+// ────────────────────────────────────────────
+let activeEx = 'bench';
+let mode = 'kg'; // 'kg' | 'vol'
+
+// ────────────────────────────────────────────
+// HERO ANIMATIONS
+// ────────────────────────────────────────────
+function animateCounter(el, target, duration=1200, suffix='') {
+  const start = Date.now();
+  const tick = () => {
+    const p = Math.min((Date.now()-start)/duration, 1);
+    const ease = 1-Math.pow(1-p, 3);
+    el.textContent = Math.round(target*ease) + suffix;
+    if(p<1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+function initHero() {
+  // Days since 11.02.2026
+  const start = new Date('2026-02-11');
+  const today = new Date('2026-04-12');
+  const days = Math.round((today - start) / 86400000);
+  animateCounter(document.getElementById('dayCount'), days, 1200);
+
+  // Recovery score
+  const scores = {
+    bench:     80/85,
+    butterfly: 85/103,
+    latzug:    70/80,
+    rudern:    65/70,
+    laufen:    0.5,
+  };
+  const avg = Object.values(scores).reduce((a,b)=>a+b,0) / Object.keys(scores).length;
+  const pct = Math.round(avg * 100);
+
+  // Ring
+  const circ = 2 * Math.PI * 76;
+  const offset = circ * (1 - avg);
+  setTimeout(() => {
+    document.getElementById('ringFill').style.strokeDashoffset = offset;
+  }, 200);
+  animateCounter(document.getElementById('ringPct'), pct, 1500, '%');
+}
+
+// ────────────────────────────────────────────
+// EXERCISE CARDS
+// ────────────────────────────────────────────
+function buildExCards() {
+  const grid = document.getElementById('exGrid');
+  Object.entries(EXERCISES).forEach(([key, ex]) => {
+    const last = ex.data[ex.data.length-1];
+    const pct = Math.min(100, Math.round((last.kg / ex.preInjury) * 100));
+    const card = document.createElement('div');
+    card.className = 'ex-card' + (key===activeEx?' active':'');
+    card.id = 'card-'+key;
+    card.innerHTML = `
+      <div class="name">${ex.name}</div>
+      <div class="cur" style="color:${ex.color}">${last.kg} ${ex.unit}</div>
+      <div class="pre">Pre-Injury: ${ex.preInjury} ${ex.unit}</div>
+      <div class="prog"><div class="prog-fill" style="width:${pct}%;background:${ex.color}"></div></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">${pct}% zurück</div>
+      <canvas class="sparkline" id="spark-${key}" height="40"></canvas>
+    `;
+    card.onclick = () => selectEx(key);
+    grid.appendChild(card);
+    drawSparkline('spark-'+key, ex);
+  });
+}
+
+function drawSparkline(id, ex) {
+  const canvas = document.getElementById(id);
+  if(!canvas) return;
+  const dpr = window.devicePixelRatio||1;
+  const w = canvas.offsetWidth||160;
+  const h = 40;
+  canvas.width = w*dpr; canvas.height = h*dpr;
+  canvas.style.width = w+'px'; canvas.style.height = h+'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const vals = ex.data.map(d=>d.kg);
+  const min = Math.min(...vals) * 0.9;
+  const max = Math.max(ex.peak, ...vals) * 1.05;
+  const pad = 4;
+  const scaleX = i => pad + (i/(ex.data.length-1||1)) * (w-pad*2);
+  const scaleY = v => h - pad - ((v-min)/(max-min)) * (h-pad*2);
+
+  ctx.strokeStyle = ex.color;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  vals.forEach((v,i) => i===0 ? ctx.moveTo(scaleX(i), scaleY(v)) : ctx.lineTo(scaleX(i), scaleY(v)));
+  ctx.stroke();
+
+  // dots
+  vals.forEach((v,i) => {
+    ctx.fillStyle = ex.color;
+    ctx.beginPath(); ctx.arc(scaleX(i), scaleY(v), 2.5, 0, Math.PI*2); ctx.fill();
+  });
+}
+
+function selectEx(key) {
+  document.querySelectorAll('.ex-card').forEach(c=>c.classList.remove('active'));
+  document.getElementById('card-'+key)?.classList.add('active');
+  activeEx = key;
+  document.getElementById('chartTitle').textContent = EXERCISES[key].name;
+  drawMainChart();
+}
+
+// ────────────────────────────────────────────
+// MAIN CHART
+// ────────────────────────────────────────────
+function setMode(m) {
+  mode = m;
+  document.getElementById('btnKg').classList.toggle('on', m==='kg');
+  document.getElementById('btnVol').classList.toggle('on', m==='vol');
+  drawMainChart();
+}
+
+function drawMainChart() {
+  const ex = EXERCISES[activeEx];
+  const canvas = document.getElementById('mainChart');
+  const dpr = window.devicePixelRatio||1;
+  const W = canvas.offsetWidth;
+  const H = 280;
+  canvas.width = W*dpr; canvas.height = H*dpr;
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const padL=52, padR=20, padT=20, padB=36;
+  const cW = W-padL-padR;
+  const cH = H-padT-padB;
+
+  const allData = [...ex.data, ...ex.projection];
+  const vals = mode==='kg'
+    ? allData.map(d=>d.kg)
+    : allData.map(d=>d.kg * (d.sets||1) * ((d.reps||[8]).reduce((a,b)=>a+b,0)/(d.reps||[8]).length));
+
+  const refs = [ex.preInjury, ex.peak];
+  const allVals = [...vals, ...refs];
+  const minV = Math.min(...allVals)*0.85;
+  const maxV = Math.max(...allVals)*1.08;
+
+  const totalPts = allData.length;
+  const sx = i => padL + (i/(totalPts-1)) * cW;
+  const sy = v => padT + cH - ((v-minV)/(maxV-minV)) * cH;
+
+  // Grid
+  ctx.strokeStyle = '#2e3348';
+  ctx.lineWidth = 1;
+  const steps = 5;
+  for(let i=0;i<=steps;i++) {
+    const y = padT + (i/steps)*cH;
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+    const v = maxV - (i/steps)*(maxV-minV);
+    ctx.fillStyle = '#7a7f9a';
+    ctx.font = `11px -apple-system,sans-serif`;
+    ctx.textAlign = 'right';
+    ctx.fillText(mode==='kg' ? Math.round(v)+'kg' : Math.round(v)+'vol', padL-6, y+4);
+  }
+
+  // Reference lines
+  const drawRef = (val, color, label) => {
+    const rv = mode==='vol' ? val*3*8 : val;
+    if(rv < minV || rv > maxV) return;
+    const y = sy(rv);
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4,4]);
+    ctx.globalAlpha = .5;
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = color;
+    ctx.font = `10px -apple-system,sans-serif`;
+    ctx.textAlign = 'left';
+    ctx.globalAlpha = .7;
+    ctx.fillText(label+' '+val+(mode==='kg'?'kg':''), padL+4, y-4);
+    ctx.globalAlpha = 1;
+  };
+  if(ex.peak !== ex.preInjury) drawRef(ex.peak, '#e05c6e', 'Peak');
+  drawRef(ex.preInjury, '#f7c948', 'Pre-Injury');
+
+  // Actual line
+  const actualPts = ex.data.length;
+  ctx.strokeStyle = ex.color;
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ex.data.forEach((d,i) => {
+    const v = mode==='kg' ? d.kg : d.kg*(d.sets||1)*((d.reps||[8]).reduce((a,b)=>a+b,0)/(d.reps||[8]).length);
+    i===0 ? ctx.moveTo(sx(i), sy(v)) : ctx.lineTo(sx(i), sy(v));
+  });
+  ctx.stroke();
+
+  // Projection line
+  if(ex.projection.length) {
+    ctx.strokeStyle = '#a78bfa';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([5,4]);
+    ctx.globalAlpha = .6;
+    ctx.beginPath();
+    const lastActual = ex.data[actualPts-1];
+    const lv = mode==='kg' ? lastActual.kg : lastActual.kg*(lastActual.sets||1)*((lastActual.reps||[8]).reduce((a,b)=>a+b,0)/(lastActual.reps||[8]).length);
+    ctx.moveTo(sx(actualPts-1), sy(lv));
+    ex.projection.forEach((d,i) => {
+      const v = mode==='kg' ? d.kg : d.kg*3*8;
+      ctx.lineTo(sx(actualPts+i), sy(v));
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 1;
+  }
+
+  // Dots + hover store
+  canvas._points = [];
+  allData.forEach((d,i) => {
+    const isProj = d.proj;
+    const v = mode==='kg' ? d.kg : d.kg*(d.sets||1)*((d.reps||[8]).reduce((a,b)=>a+b,0)/(d.reps||[8]).length||1);
+    const x = sx(i); const y = sy(v);
+    ctx.fillStyle = isProj ? '#a78bfa' : ex.color;
+    ctx.globalAlpha = isProj ? .5 : 1;
+    ctx.beginPath(); ctx.arc(x, y, isProj?3:5, 0, Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 1;
+    canvas._points.push({ x, y, v, d, isProj });
+  });
+
+  // X Labels
+  ctx.fillStyle = '#7a7f9a';
+  ctx.font = `10px -apple-system,sans-serif`;
+  ctx.textAlign = 'center';
+  allData.forEach((d,i) => {
+    if(i % Math.max(1,Math.floor(allData.length/8))===0 || i===allData.length-1) {
+      ctx.globalAlpha = d.proj ? .5 : 1;
+      ctx.fillText(d.date, sx(i), H-padB+16);
+    }
+  });
+  ctx.globalAlpha = 1;
+
+  // Hover
+  canvas.onmousemove = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left);
+    const my = (e.clientY - rect.top);
+    let closest = null, minDist = 30;
+    canvas._points.forEach(p => {
+      const d = Math.sqrt((p.x-mx)**2+(p.y-my)**2);
+      if(d<minDist){minDist=d;closest=p;}
+    });
+    const tt = document.getElementById('tooltip');
+    if(closest) {
+      document.getElementById('tt-val').textContent = (mode==='kg'
+        ? closest.d.kg + ' ' + ex.unit
+        : 'Vol ' + Math.round(closest.v));
+      const extra = closest.d.note ? ` — ${closest.d.note}` : '';
+      const projLabel = closest.isProj ? ' (Projektion)' : '';
+      document.getElementById('tt-lbl').textContent = closest.d.date + projLabel + extra;
+      tt.style.display = 'block';
+      tt.style.left = (e.clientX+14)+'px';
+      tt.style.top = (e.clientY-30)+'px';
+    } else {
+      tt.style.display = 'none';
+    }
+  };
+  canvas.onmouseleave = () => document.getElementById('tooltip').style.display='none';
+}
+
+// ────────────────────────────────────────────
+// PROJECTION CARDS
+// ────────────────────────────────────────────
+function buildProjection() {
+  const grid = document.getElementById('projGrid');
+  const items = [
+    {
+      title:"Bankdrücken 85 kg",
+      target:85, current:80, unit:"kg",
+      eta:"~27. April 2026",
+      steps:["Jetzt: 80 kg × 3×8 solide","~20.04: 82,5 kg einführen","~27.04: 85 kg Arbeitssatz"],
+      color:"var(--blue)", pct:94
+    },
+    {
+      title:"Bankdrücken 90 kg (Peak)",
+      target:90, current:80, unit:"kg",
+      eta:"~Juni 2026",
+      steps:["85 kg erst 4 Wochen stabilisieren","Dann wöchentlich +1,25–2,5 kg","90 kg ≈ KW22–24"],
+      color:"var(--purple)", pct:89
+    },
+    {
+      title:"Butterfly 100 kg+",
+      target:103, current:85, unit:"kg",
+      eta:"~Mitte Mai 2026",
+      steps:["Jetzt: 85 kg × 2×7","Schulter stabilisieren","+5 kg alle 2 Wochen"],
+      color:"var(--red)", pct:83
+    },
+    {
+      title:"Latzug 80 kg",
+      target:80, current:70, unit:"kg",
+      eta:"~Anfang Mai 2026",
+      steps:["Jetzt: 70 kg × 2×7","Nächste Stufe: 75 kg","80 kg ≈ KW18–19"],
+      color:"var(--green)", pct:88
+    },
+    {
+      title:"Laufen 10 km",
+      target:10, current:5.14, unit:"km",
+      eta:"~Mitte Mai 2026",
+      steps:["Jetzt: 5 km stabil","+1–2 km alle 1–2 Wochen","10 km sobald Rücken OK"],
+      color:"var(--purple)", pct:51
+    },
+    {
+      title:"4 Einheiten/Woche",
+      target:4, current:2, unit:"",
+      eta:"~KW17–18",
+      steps:["KW15: Mo Push + Di Pull + AW","KW17: + Laufen 2×/Woche","Zielfrequenz erreicht"],
+      color:"var(--yellow)", pct:50
+    },
+  ];
+
+  items.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'proj-card';
+    card.innerHTML = `
+      <h4>${item.title}</h4>
+      <div class="target" style="color:${item.color}">${item.target}${item.unit}</div>
+      <div class="eta">${item.eta}</div>
+      <div class="proj-bar"><div class="proj-fill" style="width:${item.pct}%;background:${item.color}"></div></div>
+      <div style="font-size:11px;color:var(--muted)">${item.pct}% erreicht</div>
+      <div class="proj-steps">${item.steps.map(s=>`<span>→ ${s}</span>`).join('')}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ────────────────────────────────────────────
+// FREQUENCY CHART
+// ────────────────────────────────────────────
+function buildFreq() {
+  const grid = document.getElementById('freqGrid');
+  const max = 3;
+  FREQ.forEach(w => {
+    const col = document.createElement('div');
+    col.className = 'freq-col';
+    const barH = w.n === 0 ? 4 : Math.round((w.n/max)*80);
+    const color = w.projected ? 'var(--green)' : w.n===0 ? 'var(--red)' : w.n>=2 ? 'var(--blue)' : 'var(--muted)';
+    col.innerHTML = `
+      <div class="freq-n" style="color:${color}">${w.projected?'3*':w.n}</div>
+      <div class="freq-bar-wrap">
+        <div class="freq-bar" style="height:${barH}px;background:${color};width:28px;${w.projected?'opacity:.5':''}"></div>
+      </div>
+      <div class="freq-kw" style="font-size:9px">${w.kw}</div>
+      <div class="freq-kw">${w.date}</div>
+    `;
+    grid.appendChild(col);
+  });
+  const note = document.createElement('div');
+  note.style.cssText='font-size:11px;color:var(--muted);grid-column:1/-1;margin-top:4px;';
+  note.textContent='* KW15: Mo+Di Gym + So AW-Verein (geplant)';
+  grid.appendChild(note);
+}
+
+// ────────────────────────────────────────────
+// INIT
+// ────────────────────────────────────────────
+window.addEventListener('load', () => {
+  initHero();
+  buildExCards();
+  buildProjection();
+  buildFreq();
+  setTimeout(drawMainChart, 100);
+});
+window.addEventListener('resize', drawMainChart);
+</script>
+</body>
+</html>
