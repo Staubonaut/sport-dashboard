@@ -120,7 +120,10 @@ strong{color:var(--text);}
 
 <!-- ── EXERCISE OVERVIEW ── -->
 <h2>Übungen — Comeback-Stand</h2>
-<div class="ex-grid" id="exGrid"></div>
+<div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--blue);margin-bottom:8px;font-weight:600;">💪 Gym</div>
+<div class="ex-grid" id="exGridGym"></div>
+<div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--purple);margin:20px 0 8px;font-weight:600;">🏃 Laufen</div>
+<div class="ex-grid" id="exGridRun"></div>
 
 <!-- ── MAIN CHART ── -->
 <h2>Detailansicht</h2>
@@ -323,9 +326,14 @@ function initHero() {
 // ────────────────────────────────────────────
 // EXERCISE CARDS
 // ────────────────────────────────────────────
+const GYM_KEYS = ['bench','butterfly','latzug','rudern'];
+const RUN_KEYS = ['laufen'];
+
 function buildExCards() {
-  const grid = document.getElementById('exGrid');
+  const gymGrid = document.getElementById('exGridGym');
+  const runGrid = document.getElementById('exGridRun');
   Object.entries(EXERCISES).forEach(([key, ex]) => {
+    const grid = RUN_KEYS.includes(key) ? runGrid : gymGrid;
     const last = ex.data[ex.data.length-1];
     const pct = Math.min(100, Math.round((last.kg / ex.preInjury) * 100));
     const card = document.createElement('div');
