@@ -249,17 +249,22 @@ const EXERCISES = {
     name: "Laufen",
     unit: "km",
     preInjury: 10,
-    peak: 15.03,
+    peak: 21.64,
     color: "#a78bfa",
     data: [
-      { date:"07.04", kg:5.14, reps:[1], sets:1, note:"6:26/km · HR 157" },
+      { date:"09.08", kg:5.08,  reps:[1], sets:1, note:"6:17/km · Sommer 2025" },
+      { date:"27.08", kg:10.12, reps:[1], sets:1, note:"5:39/km · 10er" },
+      { date:"05.10", kg:21.64, reps:[1], sets:1, note:"Halbmarathon! 6:22/km" },
+      { date:"31.12", kg:9.95,  reps:[1], sets:1, note:"6:36/km" },
+      { date:"23.01", kg:15.26, reps:[1], sets:1, note:"6:30/km · letzter Lauf" },
+      { date:"07.04", kg:5.17,  reps:[1], sets:1, note:"Comeback · 6:25/km · HR 157" },
     ],
     projection: [
       { date:"14.04", kg:5,   proj:true },
-      { date:"18.04", kg:5,   proj:true },
-      { date:"25.04", kg:7,   proj:true },
-      { date:"02.05", kg:8,   proj:true },
-      { date:"16.05", kg:10,  proj:true },
+      { date:"21.04", kg:6,   proj:true },
+      { date:"28.04", kg:7,   proj:true },
+      { date:"12.05", kg:10,  proj:true },
+      { date:"09.06", kg:15,  proj:true },
     ]
   }
 };
@@ -309,7 +314,7 @@ function initHero() {
     butterfly: 85/103,
     latzug:    70/80,
     rudern:    65/70,
-    laufen:    0.5,
+    laufen:    5.17/10,
   };
   const avg = Object.values(scores).reduce((a,b)=>a+b,0) / Object.keys(scores).length;
   const pct = Math.round(avg * 100);
