@@ -1,6 +1,6 @@
 # Gym Progression
-**Stand:** 06.04.2026  |  **Analysierte Einheiten:** 100
-**Zeitraum:** 14.01.2024 – 04.04.2026
+**Stand:** 13.04.2026  |  **Analysierte Einheiten:** 101
+**Zeitraum:** 14.01.2024 – 13.04.2026
 
 ---
 ## Bankdrücken (Hauptindikator)
@@ -26,11 +26,12 @@
 | 27.03.2026 | 80.0 kg | 8 |  |
 | 30.03.2026 | 80.0 kg | 6 |  |
 | 04.04.2026 | 80.0 kg | 8 |  |
+| 13.04.2026 | 85.0 kg | 7 | Wiederaufbau: 85 kg zurück — 85×7, 85×5, 80×6-7. Dips mit 20 kg Support. |
 
 **Peak:** 90.0 kg (02.12.2024)
-**Aktuell:** 80.0 kg (04.04.2026)
+**Aktuell:** 85.0 kg (13.04.2026)
 
-**Nächstes Ziel:** 82,5 kg × 3×8
+**Nächstes Ziel:** 85 kg × 3×8
 
 ---
 ## Weitere Übungen — Peak-Gewichte
@@ -51,4 +52,4 @@
 | Jan 2026 | 11 |
 | Feb 2026 | 1 |
 | Mär 2026 | 5 |
-| Apr 2026 | 1 |
+| Apr 2026 | 2 |

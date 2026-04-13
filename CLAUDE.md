@@ -44,7 +44,7 @@
 - Split: Push / Pull / Beine (Beine pausiert wegen Hexenschuss, werden ab ~13.04.2026 wieder eingeführt)
 - Kein Kniebeugen/Kreuzheben aktuell — erst nach Freigabe durch Physio
 - Hexenschuss ~Anfang Feb 2026 → 7 Wochen Pause → seit ~Ende März 2026 im Wiederaufbau
-- **Bankdrücken:** aktuell 80 kg 3 Sätze (2×8 + 1×5) | vor Verletzung: 85 kg Arbeitssatz
+- **Bankdrücken:** aktuell 85 kg zurück (13.04.2026: 85×7, 85×5, 80×6-7) | vor Verletzung: 85 kg Arbeitssatz
 - Kein Maxkrafttest bisher
 - Physiotherapie (Emilia, Physiovital Aachen) läuft aktiv — Termine im Kalender
 

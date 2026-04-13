@@ -1,73 +1,1402 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Sport Dashboard</title>
-  <style>
-    :root {
-      --bg:#0f1117; --s1:#1a1d27; --border:#2e3348;
-      --blue:#4f8ef7; --green:#34c77b; --yellow:#f7c948; --purple:#a78bfa;
-      --text:#e4e6f0; --muted:#7a7f9a;
-    }
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
-    .wrap { max-width:480px; width:100%; }
-    .header { text-align:center; margin-bottom:40px; }
-    .header h1 { font-size:24px; font-weight:700; margin-bottom:6px; }
-    .header p { color:var(--muted); font-size:14px; }
-    .cards { display:flex; flex-direction:column; gap:14px; }
-    a.card {
-      display:flex; align-items:center; gap:16px;
-      background:var(--s1); border:1px solid var(--border); border-radius:12px;
-      padding:18px 20px; text-decoration:none; color:var(--text);
-      transition:border-color .2s, background .2s;
-    }
-    a.card:hover { background:#22263a; }
-    .card-icon { font-size:28px; flex-shrink:0; }
-    .card-text h2 { font-size:16px; font-weight:600; margin-bottom:3px; }
-    .card-text p { font-size:13px; color:var(--muted); }
-    .card-arrow { margin-left:auto; color:var(--muted); font-size:18px; }
-    .card.blue  { border-left:3px solid var(--blue); }
-    .card.green { border-left:3px solid var(--green); }
-    .card.yellow{ border-left:3px solid var(--yellow); }
-    .card.purple{ border-left:3px solid var(--purple); }
-    footer { text-align:center; margin-top:40px; font-size:12px; color:var(--muted); }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Sport Dashboard</title>
+<style>
+:root {
+  --bg: #090a0f;
+  --s0: #0e1018;
+  --s1: #141722;
+  --s2: #1c2030;
+  --s3: #252a3a;
+  --border: #252a3a;
+  --blue: #4f8ef7;
+  --blue2: #3a6fd8;
+  --green: #34c77b;
+  --green2: #28a966;
+  --yellow: #f7c948;
+  --red: #e05c6e;
+  --purple: #a78bfa;
+  --cyan: #22d3ee;
+  --text: #e8eaf0;
+  --text2: #c0c4d4;
+  --muted: #6b7194;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI","Inter",sans-serif;font-size:14px;line-height:1.5;overflow-x:hidden;}
+::selection{background:var(--blue);color:#fff;}
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:var(--s0);}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px;}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;background:rgba(14,16,24,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;padding:0 24px;height:52px;gap:8px;}
+.nav-brand{font-weight:700;font-size:15px;margin-right:24px;color:var(--text);letter-spacing:-.01em;}
+.nav-brand span{color:var(--blue);}
+.nav-tabs{display:flex;gap:2px;}
+.nav-tab{padding:6px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:.15s;border:none;background:none;}
+.nav-tab:hover{color:var(--text2);background:var(--s2);}
+.nav-tab.active{color:var(--text);background:var(--s2);}
+.nav-indicator{display:none;}
+
+/* ── LAYOUT ── */
+.page{display:none;max-width:1200px;margin:0 auto;padding:24px 24px 80px;}
+.page.active{display:block;animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── GRID ── */
+.grid{display:grid;gap:16px;}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+@media(max-width:900px){.grid-4,.grid-3{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr;}}
+
+/* ── CARDS ── */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .2s;}
+.card:hover{border-color:var(--s3);}
+.card-lg{padding:24px;}
+
+/* ── KPI ── */
+.kpi{text-align:center;padding:20px 12px;}
+.kpi .value{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.2;}
+.kpi .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:4px;}
+.kpi .sub{font-size:12px;color:var(--muted);margin-top:2px;}
+
+/* ── SECTION HEADER ── */
+.section-head{display:flex;align-items:center;justify-content:space-between;margin:32px 0 16px;flex-wrap:wrap;gap:8px;}
+.section-head:first-child{margin-top:0;}
+.section-title{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);}
+.section-title .accent{color:var(--blue);}
+
+/* ── FILTER BAR ── */
+.filter-bar{display:flex;gap:4px;flex-wrap:wrap;}
+.filter-btn{padding:5px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border:1px solid var(--border);background:var(--s1);transition:.15s;}
+.filter-btn:hover{color:var(--text2);border-color:var(--s3);}
+.filter-btn.active{color:#fff;background:var(--blue);border-color:var(--blue);}
+
+/* ── CHART BOX ── */
+.chart-box{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+.chart-title{font-size:15px;font-weight:600;}
+.chart-legend{display:flex;gap:14px;font-size:11px;color:var(--muted);align-items:center;}
+.leg-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:middle;}
+canvas{display:block;width:100%;}
+
+/* ── TOGGLE ── */
+.toggle-wrap{display:flex;gap:2px;background:var(--s0);border-radius:var(--radius-sm);padding:2px;}
+.toggle-btn{padding:4px 12px;border-radius:4px;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;border:none;background:none;transition:.15s;}
+.toggle-btn.on{color:#fff;background:var(--blue);}
+
+/* ── TABLE ── */
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead{background:var(--s2);}
+th{padding:10px 14px;text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);cursor:pointer;white-space:nowrap;user-select:none;}
+th:hover{color:var(--text2);}
+td{padding:10px 14px;border-top:1px solid var(--border);white-space:nowrap;}
+tr:hover td{background:var(--s2);}
+.sort-arrow{margin-left:4px;opacity:.4;}
+th.sorted .sort-arrow{opacity:1;color:var(--blue);}
+
+/* ── BADGE ── */
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:600;letter-spacing:.03em;}
+.badge-push{background:rgba(79,142,247,.15);color:var(--blue);}
+.badge-pull{background:rgba(52,199,123,.15);color:var(--green);}
+.badge-legs{background:rgba(167,139,250,.15);color:var(--purple);}
+.badge-mixed{background:rgba(247,201,72,.15);color:var(--yellow);}
+.badge-other{background:rgba(107,113,148,.15);color:var(--muted);}
+
+/* ── PR TAG ── */
+.pr-tag{display:inline-block;background:rgba(247,201,72,.15);color:var(--yellow);font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:6px;}
+
+/* ── TOOLTIP ── */
+#tooltip{position:fixed;background:var(--s2);border:1px solid var(--s3);border-radius:8px;padding:10px 14px;font-size:13px;pointer-events:none;display:none;z-index:200;max-width:260px;box-shadow:0 8px 32px rgba(0,0,0,.5);}
+#tooltip .tt-val{font-size:18px;font-weight:700;margin-bottom:2px;}
+#tooltip .tt-lbl{color:var(--muted);font-size:11px;line-height:1.4;}
+
+/* ── PROGRESS BAR ── */
+.progress{height:6px;background:var(--s3);border-radius:99px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:99px;transition:width .6s ease;}
+
+/* ── STAT ROW ── */
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
+.stat-row:last-child{border-bottom:none;}
+.stat-label{font-size:13px;color:var(--muted);}
+.stat-value{font-size:14px;font-weight:600;}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:48px 24px;color:var(--muted);}
+
+/* ── SPARKLINE ── */
+.spark-wrap{display:inline-block;vertical-align:middle;}
+
+/* ── RUN CARD ── */
+.run-card{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:14px 16px;background:var(--s1);border:1px solid var(--border);border-radius:var(--radius-sm);transition:.15s;cursor:pointer;}
+.run-card:hover{border-color:var(--green);background:var(--s2);}
+.run-card .top{display:flex;align-items:center;gap:10px;}
+.run-card .dist{font-size:18px;font-weight:700;color:var(--green);}
+.run-card .meta{font-size:12px;color:var(--muted);}
+.run-card .pace-badge{font-size:13px;font-weight:600;padding:4px 10px;border-radius:var(--radius-sm);background:var(--s2);}
+
+/* ── PAGE HEADER ── */
+.page-header{margin-bottom:24px;}
+.page-header h1{font-size:22px;font-weight:700;letter-spacing:-.02em;}
+.page-header p{color:var(--muted);font-size:13px;margin-top:4px;}
+
+/* ── DONUT ── */
+.donut-wrap{position:relative;width:160px;height:160px;margin:0 auto;}
+.donut-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+.donut-center .val{font-size:24px;font-weight:700;}
+.donut-center .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+
+/* ── HEATMAP ── */
+.heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.hm-cell{aspect-ratio:1;border-radius:3px;position:relative;}
+.hm-cell.empty{background:var(--s2);opacity:.3;}
+.hm-label{font-size:9px;color:var(--muted);text-align:center;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  .nav-inner{padding:0 12px;}
+  .page{padding:16px 12px 60px;}
+  .kpi .value{font-size:22px;}
+  .chart-header{flex-direction:column;align-items:flex-start;}
+}
+</style>
 </head>
 <body>
-<div class="wrap">
-  <div class="header">
-    <h1>Sport Dashboard</h1>
-    <p>Dein persönliches Trainings-Cockpit</p>
+
+<div id="tooltip"><div class="tt-val" id="tt-val"></div><div class="tt-lbl" id="tt-lbl"></div></div>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-brand">Sport<span>Hub</span></div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showPage('dashboard')">Dashboard</button>
+      <button class="nav-tab" onclick="showPage('gym')">Gym</button>
+      <button class="nav-tab" onclick="showPage('laufen')">Laufen</button>
+      <button class="nav-tab" onclick="showPage('koerper')">Körper</button>
+    </div>
   </div>
-  <div class="cards">
-    <a class="card green" href="comeback.html">
-      <div class="card-icon">💪</div>
-      <div class="card-text">
-        <h2>Comeback Tracker</h2>
-        <p>Recovery-Stand · Progression · Projektion</p>
-      </div>
-      <div class="card-arrow">›</div>
-    </a>
-    <a class="card yellow" href="plan/analyse_aug2025_apr2026.html">
-      <div class="card-icon">📊</div>
-      <div class="card-text">
-        <h2>Trainingsanalyse</h2>
-        <p>Aug 2025 – Apr 2026 · Gym &amp; Laufen</p>
-      </div>
-      <div class="card-arrow">›</div>
-    </a>
-    <a class="card blue" href="README.html">
-      <div class="card-icon">📖</div>
-      <div class="card-text">
-        <h2>System-Dokumentation</h2>
-        <p>Was Claude kann · Dateistruktur · Anleitungen</p>
-      </div>
-      <div class="card-arrow">›</div>
-    </a>
+</nav>
+
+<!-- ═══════════════ DASHBOARD ═══════════════ -->
+<div class="page active" id="page-dashboard">
+  <div class="page-header">
+    <h1>Dashboard</h1>
+    <p id="dash-subtitle">Gesamtübersicht</p>
   </div>
-  <footer>Letzte Aktualisierung: April 2026</footer>
+  <div class="grid grid-4" id="dash-kpis"></div>
+  <div class="section-head"><span class="section-title">Letzte 12 Wochen</span></div>
+  <div class="card card-lg">
+    <div class="chart-header">
+      <span class="chart-title">Trainingsaktivität</span>
+      <div class="chart-legend">
+        <span><span class="leg-dot" style="background:var(--blue)"></span>Gym</span>
+        <span><span class="leg-dot" style="background:var(--green)"></span>Laufen</span>
+      </div>
+    </div>
+    <canvas id="dash-heatmap" height="120"></canvas>
+  </div>
+  <div class="grid grid-2" style="margin-top:16px">
+    <div class="card card-lg">
+      <div class="chart-header">
+        <span class="chart-title">Gym — Volumen-Trend</span>
+      </div>
+      <canvas id="dash-gym-spark" height="140"></canvas>
+    </div>
+    <div class="card card-lg">
+      <div class="chart-header">
+        <span class="chart-title">Laufen — Distanz & Pace</span>
+      </div>
+      <canvas id="dash-run-spark" height="140"></canvas>
+    </div>
+  </div>
 </div>
+
+<!-- ═══════════════ GYM ═══════════════ -->
+<div class="page" id="page-gym">
+  <div class="page-header">
+    <h1>Gym</h1>
+    <p id="gym-subtitle"></p>
+  </div>
+  <div class="grid grid-4" id="gym-kpis"></div>
+
+  <div class="section-head">
+    <span class="section-title">Bankdrücken — Progression</span>
+    <div class="toggle-wrap">
+      <button class="toggle-btn on" onclick="setGymMode('kg')">Gewicht</button>
+      <button class="toggle-btn" onclick="setGymMode('vol')">Volumen</button>
+      <button class="toggle-btn" onclick="setGymMode('e1rm')">Est. 1RM</button>
+    </div>
+  </div>
+  <div class="chart-box"><canvas id="bench-chart" height="280"></canvas></div>
+
+  <div class="section-head">
+    <span class="section-title">Session-Volumen</span>
+    <div class="filter-bar" id="gym-filter"></div>
+  </div>
+  <div class="chart-box"><canvas id="volume-chart" height="220"></canvas></div>
+
+  <div class="grid grid-2" style="margin-top:16px">
+    <div class="card card-lg">
+      <div class="chart-header"><span class="chart-title">Split-Verteilung</span></div>
+      <div style="display:flex;align-items:center;gap:24px;">
+        <div class="donut-wrap"><canvas id="split-donut" width="160" height="160"></canvas>
+          <div class="donut-center"><div class="val" id="split-total"></div><div class="lbl">Sessions</div></div>
+        </div>
+        <div id="split-legend" style="font-size:13px;"></div>
+      </div>
+    </div>
+    <div class="card card-lg">
+      <div class="chart-header"><span class="chart-title">Monatliche Frequenz</span></div>
+      <canvas id="gym-freq" height="180"></canvas>
+    </div>
+  </div>
+
+  <div class="section-head"><span class="section-title">Session-Verlauf</span></div>
+  <div class="table-wrap">
+    <table id="gym-table">
+      <thead>
+        <tr>
+          <th onclick="sortGymTable('d')">Datum <span class="sort-arrow">▼</span></th>
+          <th onclick="sortGymTable('t')">Typ <span class="sort-arrow">▼</span></th>
+          <th onclick="sortGymTable('vol')">Volumen <span class="sort-arrow">▼</span></th>
+          <th onclick="sortGymTable('n')">Übungen <span class="sort-arrow">▼</span></th>
+          <th onclick="sortGymTable('bench')">Bench <span class="sort-arrow">▼</span></th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody id="gym-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════ LAUFEN ═══════════════ -->
+<div class="page" id="page-laufen">
+  <div class="page-header">
+    <h1>Laufen</h1>
+    <p id="run-subtitle"></p>
+  </div>
+  <div class="grid grid-4" id="run-kpis"></div>
+
+  <div class="section-head">
+    <span class="section-title">Pace-Trend</span>
+    <div class="toggle-wrap">
+      <button class="toggle-btn on" onclick="setRunMode('pace')">Pace</button>
+      <button class="toggle-btn" onclick="setRunMode('dist')">Distanz</button>
+      <button class="toggle-btn" onclick="setRunMode('time')">Zeit</button>
+    </div>
+  </div>
+  <div class="chart-box"><canvas id="pace-chart" height="300"></canvas></div>
+
+  <div class="grid grid-2" style="margin-top:16px">
+    <div class="card card-lg">
+      <div class="chart-header"><span class="chart-title">Pace vs. Distanz</span></div>
+      <canvas id="pace-dist-scatter" height="220"></canvas>
+    </div>
+    <div class="card card-lg">
+      <div class="chart-header"><span class="chart-title">Monatliches Volumen</span></div>
+      <canvas id="run-monthly" height="220"></canvas>
+    </div>
+  </div>
+
+  <div class="grid grid-2" style="margin-top:16px">
+    <div class="card card-lg">
+      <div class="chart-header"><span class="chart-title">Pace-Verteilung</span></div>
+      <canvas id="pace-histogram" height="180"></canvas>
+    </div>
+    <div class="card card-lg">
+      <div class="chart-header"><span class="chart-title">Personal Records</span></div>
+      <div id="run-prs"></div>
+    </div>
+  </div>
+
+  <div class="section-head"><span class="section-title">Alle Läufe</span></div>
+  <div class="table-wrap">
+    <table id="run-table">
+      <thead>
+        <tr>
+          <th onclick="sortRunTable('d')">Datum <span class="sort-arrow">▼</span></th>
+          <th onclick="sortRunTable('km')">Distanz <span class="sort-arrow">▼</span></th>
+          <th onclick="sortRunTable('pace')">Pace <span class="sort-arrow">▼</span></th>
+          <th onclick="sortRunTable('sec')">Zeit <span class="sort-arrow">▼</span></th>
+          <th onclick="sortRunTable('hr')">HR <span class="sort-arrow">▼</span></th>
+          <th onclick="sortRunTable('cal')">kcal <span class="sort-arrow">▼</span></th>
+          <th onclick="sortRunTable('elev')">Höhe <span class="sort-arrow">▼</span></th>
+        </tr>
+      </thead>
+      <tbody id="run-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════ KÖRPER ═══════════════ -->
+<div class="page" id="page-koerper">
+  <div class="page-header">
+    <h1>Körper</h1>
+    <p>Gewicht & Ziele</p>
+  </div>
+  <div class="grid grid-4" id="body-kpis"></div>
+  <div class="section-head"><span class="section-title">Gewichtsverlauf</span></div>
+  <div class="chart-box"><canvas id="weight-chart" height="280"></canvas></div>
+  <div class="section-head"><span class="section-title">Ziele</span></div>
+  <div class="grid grid-3" id="goals-grid"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════
+const RUNS = [{"d": "2019-09-14", "km": 6.55, "sec": 2306, "pace": 5.87, "hr": null, "hrMax": null, "cal": 723, "elev": 48, "cad": null, "name": "Lauf am Nachmittag"}, {"d": "2019-09-19", "km": 8.46, "sec": 2682, "pace": 5.28, "hr": null, "hrMax": null, "cal": 936, "elev": 66, "cad": null, "name": "Lauf am Nachmittag"}, {"d": "2019-09-20", "km": 4.63, "sec": 1757, "pace": 6.32, "hr": null, "hrMax": null, "cal": 511, "elev": 29, "cad": null, "name": "Lauf am Morgen"}, {"d": "2019-09-23", "km": 10.02, "sec": 3525, "pace": 5.87, "hr": null, "hrMax": null, "cal": 1106, "elev": 75, "cad": null, "name": "Lauf am Mittag"}, {"d": "2019-10-01", "km": 4.52, "sec": 1318, "pace": 4.86, "hr": null, "hrMax": null, "cal": 500, "elev": 34, "cad": null, "name": "Lauf am Abend"}, {"d": "2019-10-15", "km": 6.83, "sec": 2452, "pace": 5.98, "hr": null, "hrMax": null, "cal": 751, "elev": 47, "cad": null, "name": "Lauf am Morgen"}, {"d": "2020-02-08", "km": 3.64, "sec": 1234, "pace": 5.65, "hr": null, "hrMax": null, "cal": 401, "elev": 25, "cad": null, "name": "Lauf am Mittag"}, {"d": "2020-02-19", "km": 4.65, "sec": 1510, "pace": 5.41, "hr": null, "hrMax": null, "cal": 515, "elev": 31, "cad": null, "name": "Lauf am Abend"}, {"d": "2020-03-08", "km": 4.4, "sec": 1397, "pace": 5.3, "hr": null, "hrMax": null, "cal": 485, "elev": 29, "cad": null, "name": "Lauf am Morgen"}, {"d": "2020-04-26", "km": 1.17, "sec": 435, "pace": 6.19, "hr": null, "hrMax": null, "cal": 129, "elev": 0, "cad": null, "name": "Lauf mit @Oertellini"}, {"d": "2020-05-06", "km": 2.05, "sec": 724, "pace": 5.9, "hr": null, "hrMax": null, "cal": 223, "elev": 4, "cad": null, "name": "Lauf am Morgen"}, {"d": "2020-06-17", "km": 4.45, "sec": 1413, "pace": 5.29, "hr": null, "hrMax": null, "cal": 491, "elev": 31, "cad": null, "name": "Lauf am Morgen"}, {"d": "2020-06-21", "km": 6.06, "sec": 2250, "pace": 6.18, "hr": null, "hrMax": null, "cal": 670, "elev": 53, "cad": null, "name": "Lauf am Vormittag mit @OertelliniDerZauberer"}, {"d": "2020-06-27", "km": 4.34, "sec": 1328, "pace": 5.1, "hr": null, "hrMax": null, "cal": 478, "elev": 31, "cad": 83, "name": "Lauf am Morgen"}, {"d": "2020-06-30", "km": 11.07, "sec": 3923, "pace": 5.9, "hr": null, "hrMax": null, "cal": 1226, "elev": 94, "cad": 81, "name": "Lauf am Morgen"}, {"d": "2020-07-04", "km": 6.47, "sec": 2143, "pace": 5.52, "hr": null, "hrMax": null, "cal": 715, "elev": 51, "cad": 83, "name": "Lauf am Morgen"}, {"d": "2020-07-11", "km": 7.58, "sec": 2488, "pace": 5.47, "hr": null, "hrMax": null, "cal": 836, "elev": 57, "cad": 82, "name": "Lauf am Morgen"}, {"d": "2020-10-21", "km": 4.64, "sec": 1607, "pace": 5.77, "hr": null, "hrMax": null, "cal": 512, "elev": 33, "cad": 79, "name": "Lauf am Morgen"}, {"d": "2020-11-06", "km": 4.57, "sec": 1518, "pace": 5.53, "hr": null, "hrMax": null, "cal": 505, "elev": 36, "cad": 80, "name": "Lauf am Mittag"}, {"d": "2021-01-25", "km": 7.77, "sec": 3315, "pace": 7.11, "hr": null, "hrMax": null, "cal": 877, "elev": 105, "cad": 77, "name": "Lauf am Nachmittag"}, {"d": "2021-01-29", "km": 8.49, "sec": 3420, "pace": 6.71, "hr": null, "hrMax": null, "cal": 951, "elev": 107, "cad": null, "name": "Afternoon Run"}, {"d": "2021-02-01", "km": 7.7, "sec": 3226, "pace": 6.98, "hr": null, "hrMax": null, "cal": 864, "elev": 97, "cad": 78, "name": "Lauf am Nachmittag"}, {"d": "2021-02-03", "km": 3.91, "sec": 1507, "pace": 6.43, "hr": null, "hrMax": null, "cal": 429, "elev": 27, "cad": 79, "name": "Lauf mit @OerteliniderZauberer"}, {"d": "2021-02-04", "km": 8.07, "sec": 3424, "pace": 7.07, "hr": null, "hrMax": null, "cal": 903, "elev": 102, "cad": 78, "name": "Lauf am Nachmittag"}, {"d": "2021-03-03", "km": 11.54, "sec": 4279, "pace": 6.18, "hr": null, "hrMax": null, "cal": 1297, "elev": 167, "cad": 79, "name": "Lauf am Abend"}, {"d": "2021-03-05", "km": 9.16, "sec": 3374, "pace": 6.14, "hr": null, "hrMax": null, "cal": 1031, "elev": 141, "cad": null, "name": "Lauf am Mittag"}, {"d": "2021-03-07", "km": 7.32, "sec": 2405, "pace": 5.47, "hr": null, "hrMax": null, "cal": 802, "elev": 6, "cad": null, "name": "Afternoon Run"}, {"d": "2021-03-10", "km": 8.09, "sec": 3192, "pace": 6.57, "hr": null, "hrMax": null, "cal": 937, "elev": 104, "cad": null, "name": "Lauf am Nachmittag"}, {"d": "2021-03-12", "km": 8.39, "sec": 3170, "pace": 6.29, "hr": null, "hrMax": null, "cal": 971, "elev": 107, "cad": null, "name": "Lauf am Nachmittag"}, {"d": "2021-03-14", "km": 8.19, "sec": 3159, "pace": 6.43, "hr": null, "hrMax": null, "cal": 948, "elev": 105, "cad": null, "name": "Lauf am Nachmittag"}, {"d": "2021-03-16", "km": 8.1, "sec": 3182, "pace": 6.55, "hr": null, "hrMax": null, "cal": 938, "elev": 105, "cad": null, "name": "Lauf am Abend"}, {"d": "2021-03-22", "km": 8.24, "sec": 3006, "pace": 6.08, "hr": null, "hrMax": null, "cal": 954, "elev": 105, "cad": null, "name": "Lauf am Nachmittag"}, {"d": "2021-03-24", "km": 8.15, "sec": 3326, "pace": 6.8, "hr": null, "hrMax": null, "cal": 944, "elev": 105, "cad": null, "name": "Lauf am Nachmittag"}, {"d": "2021-03-26", "km": 8.41, "sec": 3213, "pace": 6.37, "hr": null, "hrMax": null, "cal": 973, "elev": 107, "cad": null, "name": "Morning Run"}, {"d": "2021-03-28", "km": 15.07, "sec": 4804, "pace": 5.31, "hr": null, "hrMax": null, "cal": 1705, "elev": 17, "cad": null, "name": "Lauf am Nachmittag"}, {"d": "2021-03-31", "km": 7.06, "sec": 2772, "pace": 6.54, "hr": null, "hrMax": null, "cal": 834, "elev": 140, "cad": null, "name": "Lauf am Mittag"}, {"d": "2021-04-02", "km": 10.1, "sec": 3746, "pace": 6.18, "hr": null, "hrMax": null, "cal": 1157, "elev": 97, "cad": null, "name": "Lauf am Morgen"}, {"d": "2021-04-10", "km": 6.48, "sec": 2182, "pace": 5.61, "hr": null, "hrMax": null, "cal": 733, "elev": 6, "cad": null, "name": "Lauf am Nachmittag"}, {"d": "2021-04-14", "km": 8.17, "sec": 3173, "pace": 6.48, "hr": null, "hrMax": null, "cal": 946, "elev": 106, "cad": null, "name": "Lauf am Mittag"}, {"d": "2021-04-16", "km": 5.01, "sec": 1933, "pace": 6.43, "hr": null, "hrMax": null, "cal": 583, "elev": 78, "cad": null, "name": "Lauf am Nachmittag"}, {"d": "2021-04-18", "km": 6.0, "sec": 2350, "pace": 6.52, "hr": null, "hrMax": null, "cal": 703, "elev": 92, "cad": null, "name": "Lauf am Nachmittag"}, {"d": "2021-04-19", "km": 4.51, "sec": 1275, "pace": 4.72, "hr": null, "hrMax": null, "cal": 512, "elev": 30, "cad": null, "name": "Lauf am Morgen"}, {"d": "2021-04-20", "km": 7.23, "sec": 2754, "pace": 6.35, "hr": null, "hrMax": null, "cal": 837, "elev": 91, "cad": null, "name": "Lauf am Abend"}, {"d": "2021-04-23", "km": 9.8, "sec": 3846, "pace": 6.54, "hr": null, "hrMax": null, "cal": 1145, "elev": 137, "cad": null, "name": "Lauf am Nachmittag"}, {"d": "2021-04-28", "km": 11.24, "sec": 3916, "pace": 5.81, "hr": null, "hrMax": null, "cal": 1304, "elev": 168, "cad": null, "name": "Lauf am Nachmittag"}, {"d": "2021-05-02", "km": 21.15, "sec": 6793, "pace": 5.35, "hr": null, "hrMax": null, "cal": 2395, "elev": 17, "cad": null, "name": "Halbmarathon mit Eric"}, {"d": "2022-01-13", "km": 3.66, "sec": 1217, "pace": 5.54, "hr": null, "hrMax": null, "cal": 417, "elev": 24, "cad": null, "name": "Nachtlauf"}, {"d": "2022-03-21", "km": 9.22, "sec": 3897, "pace": 7.04, "hr": null, "hrMax": null, "cal": 1049, "elev": 30, "cad": null, "name": "Lauf am Mittag"}, {"d": "2023-01-03", "km": 5.04, "sec": 1695, "pace": 5.61, "hr": null, "hrMax": null, "cal": 571, "elev": 36, "cad": null, "name": "Mittagslauf"}, {"d": "2024-01-04", "km": 4.38, "sec": 1560, "pace": 5.93, "hr": null, "hrMax": null, "cal": 511, "elev": 56, "cad": null, "name": "Lauf am Abend"}, {"d": "2024-03-29", "km": 13.2, "sec": 4783, "pace": 6.04, "hr": null, "hrMax": null, "cal": 1504, "elev": 97, "cad": null, "name": "Lauf am Nachmittag"}, {"d": "2024-06-20", "km": 1.68, "sec": 617, "pace": 6.12, "hr": null, "hrMax": null, "cal": 199, "elev": 26, "cad": null, "name": "Lauf am Abend"}, {"d": "2024-07-14", "km": 4.67, "sec": 1597, "pace": 5.7, "hr": null, "hrMax": null, "cal": 531, "elev": 33, "cad": null, "name": "Lauf am Abend"}, {"d": "2024-08-01", "km": 5.0, "sec": 1566, "pace": 5.22, "hr": null, "hrMax": null, "cal": 568, "elev": 33, "cad": null, "name": "Lauf am Abend"}, {"d": "2024-08-06", "km": 3.1, "sec": 1085, "pace": 5.84, "hr": null, "hrMax": null, "cal": 355, "elev": 28, "cad": null, "name": "Lauf am Abend"}, {"d": "2024-09-24", "km": 7.47, "sec": 2691, "pace": 6.0, "hr": null, "hrMax": null, "cal": 851, "elev": 50, "cad": null, "name": "Lauf am Abend"}, {"d": "2025-01-19", "km": 10.78, "sec": 4284, "pace": 6.62, "hr": null, "hrMax": null, "cal": 1277, "elev": 197, "cad": null, "name": "Lauf am Nachmittag"}, {"d": "2025-01-31", "km": 7.08, "sec": 2434, "pace": 5.73, "hr": null, "hrMax": null, "cal": 806, "elev": 54, "cad": null, "name": "Lauf am Abend"}, {"d": "2025-03-07", "km": 5.02, "sec": 1932, "pace": 6.42, "hr": null, "hrMax": null, "cal": 572, "elev": 38, "cad": null, "name": "Lauf am Abend"}, {"d": "2025-03-24", "km": 5.0, "sec": 1948, "pace": 6.5, "hr": null, "hrMax": null, "cal": 575, "elev": 49, "cad": null, "name": "Lauf am Abend"}, {"d": "2025-04-01", "km": 7.32, "sec": 2247, "pace": 5.11, "hr": null, "hrMax": null, "cal": 833, "elev": 50, "cad": null, "name": "Lauf am Abend"}, {"d": "2025-04-10", "km": 9.1, "sec": 2981, "pace": 5.46, "hr": null, "hrMax": null, "cal": 1040, "elev": 75, "cad": null, "name": "Lauf am Abend"}, {"d": "2025-04-14", "km": 5.6, "sec": 1966, "pace": 5.85, "hr": null, "hrMax": null, "cal": 652, "elev": 44, "cad": null, "name": "Lauf am Abend"}, {"d": "2025-05-04", "km": 5.27, "sec": 1861, "pace": 5.89, "hr": null, "hrMax": null, "cal": 614, "elev": 45, "cad": null, "name": "Lauf am Nachmittag"}, {"d": "2025-05-13", "km": 6.86, "sec": 2472, "pace": 6.0, "hr": null, "hrMax": null, "cal": 836, "elev": 125, "cad": null, "name": "Lauf am Abend"}, {"d": "2025-05-23", "km": 5.84, "sec": 1939, "pace": 5.54, "hr": null, "hrMax": null, "cal": 679, "elev": 44, "cad": null, "name": "Lauf am Morgen"}, {"d": "2025-06-16", "km": 5.15, "sec": 1988, "pace": 6.44, "hr": null, "hrMax": null, "cal": 601, "elev": 45, "cad": null, "name": "Lauf am Abend"}, {"d": "2025-06-19", "km": 5.11, "sec": 1757, "pace": 5.73, "hr": null, "hrMax": null, "cal": 593, "elev": 39, "cad": null, "name": "Lauf am Nachmittag"}, {"d": "2025-06-21", "km": 5.13, "sec": 1774, "pace": 5.76, "hr": null, "hrMax": null, "cal": 598, "elev": 42, "cad": null, "name": "Nachtlauf"}, {"d": "2025-06-24", "km": 5.25, "sec": 1811, "pace": 5.74, "hr": null, "hrMax": null, "cal": 612, "elev": 41, "cad": null, "name": "Lauf am Abend"}, {"d": "2025-06-28", "km": 5.38, "sec": 2121, "pace": 6.57, "hr": null, "hrMax": null, "cal": 622, "elev": 6, "cad": null, "name": "Lauf am Morgen"}, {"d": "2025-06-30", "km": 6.19, "sec": 2288, "pace": 6.16, "hr": null, "hrMax": null, "cal": 718, "elev": 48, "cad": 79, "name": "Nachtlauf"}, {"d": "2025-07-05", "km": 6.01, "sec": 1994, "pace": 5.53, "hr": null, "hrMax": null, "cal": 698, "elev": 42, "cad": 80, "name": "Nachtlauf"}, {"d": "2025-07-07", "km": 8.21, "sec": 3175, "pace": 6.44, "hr": null, "hrMax": null, "cal": 956, "elev": 70, "cad": 79, "name": "Nachtlauf"}, {"d": "2025-07-10", "km": 6.47, "sec": 2815, "pace": 7.26, "hr": null, "hrMax": null, "cal": 753, "elev": 53, "cad": 77, "name": "Lauf am Abend"}, {"d": "2025-07-15", "km": 5.04, "sec": 1499, "pace": 4.95, "hr": null, "hrMax": null, "cal": 589, "elev": 43, "cad": 82, "name": "Lauf am Mittag"}, {"d": "2025-08-09", "km": 5.08, "sec": 1915, "pace": 6.29, "hr": null, "hrMax": null, "cal": 594, "elev": 45, "cad": 79, "name": "Nachtlauf"}, {"d": "2025-08-15", "km": 5.1, "sec": 1693, "pace": 5.53, "hr": null, "hrMax": null, "cal": 595, "elev": 41, "cad": null, "name": "Lauf am Abend"}, {"d": "2025-08-19", "km": 5.33, "sec": 1811, "pace": 5.67, "hr": null, "hrMax": null, "cal": 622, "elev": 44, "cad": null, "name": "Lauf am Abend"}, {"d": "2025-08-27", "km": 10.12, "sec": 3436, "pace": 5.66, "hr": null, "hrMax": null, "cal": 1181, "elev": 84, "cad": null, "name": "Nachtlauf"}, {"d": "2025-08-30", "km": 10.0, "sec": 3795, "pace": 6.33, "hr": null, "hrMax": null, "cal": 1160, "elev": 71, "cad": null, "name": "Lauf mit Hugolito"}, {"d": "2025-09-02", "km": 5.34, "sec": 1966, "pace": 6.13, "hr": null, "hrMax": null, "cal": 621, "elev": 41, "cad": null, "name": "Nachtlauf"}, {"d": "2025-09-08", "km": 7.11, "sec": 2366, "pace": 5.54, "hr": null, "hrMax": null, "cal": 841, "elev": 88, "cad": null, "name": "Lauf am Abend"}, {"d": "2025-09-12", "km": 6.18, "sec": 2174, "pace": 5.86, "hr": null, "hrMax": null, "cal": 720, "elev": 45, "cad": null, "name": "Lauf am Abend"}, {"d": "2025-09-23", "km": 5.28, "sec": 1753, "pace": 5.53, "hr": null, "hrMax": null, "cal": 617, "elev": 46, "cad": null, "name": "Lauf am Abend"}, {"d": "2025-09-28", "km": 10.32, "sec": 3742, "pace": 6.04, "hr": null, "hrMax": null, "cal": 1193, "elev": 6, "cad": null, "name": "Lauf am Abend"}, {"d": "2025-10-05", "km": 21.64, "sec": 8272, "pace": 6.37, "hr": null, "hrMax": null, "cal": 2509, "elev": 52, "cad": null, "name": "Lauf am Morgen"}, {"d": "2025-10-29", "km": 5.57, "sec": 2077, "pace": 6.22, "hr": null, "hrMax": null, "cal": 650, "elev": 47, "cad": null, "name": "Lauf am Abend"}, {"d": "2025-11-11", "km": 5.38, "sec": 1862, "pace": 5.77, "hr": null, "hrMax": null, "cal": 629, "elev": 43, "cad": null, "name": "Lauf am Abend"}, {"d": "2025-11-16", "km": 5.0, "sec": 1891, "pace": 6.3, "hr": null, "hrMax": null, "cal": 574, "elev": 38, "cad": null, "name": "Lauf am Abend"}, {"d": "2025-11-20", "km": 6.1, "sec": 2288, "pace": 6.25, "hr": null, "hrMax": null, "cal": 705, "elev": 0, "cad": null, "name": "Mittagslauf - Laufband"}, {"d": "2025-11-22", "km": 7.7, "sec": 2574, "pace": 5.57, "hr": null, "hrMax": null, "cal": 890, "elev": 6, "cad": null, "name": "Lauf am Nachmittag mit Eritul"}, {"d": "2025-11-27", "km": 7.4, "sec": 2656, "pace": 5.98, "hr": null, "hrMax": null, "cal": 864, "elev": 59, "cad": null, "name": "Lauf am Abend"}, {"d": "2025-12-04", "km": 6.26, "sec": 2385, "pace": 6.35, "hr": 151, "hrMax": 164, "cal": 634, "elev": 46, "cad": 78, "name": "Afternoon Run"}, {"d": "2025-12-09", "km": 7.33, "sec": 2904, "pace": 6.61, "hr": 153, "hrMax": 171, "cal": 695, "elev": 26, "cad": 78, "name": "Afternoon Run"}, {"d": "2025-12-30", "km": 4.52, "sec": 1577, "pace": 5.81, "hr": null, "hrMax": null, "cal": 523, "elev": 0, "cad": null, "name": "Lauf am Morgen"}, {"d": "2025-12-31", "km": 9.95, "sec": 3947, "pace": 6.61, "hr": 159, "hrMax": 170, "cal": 938, "elev": 5, "cad": 78, "name": "Afternoon Run"}, {"d": "2026-01-03", "km": 6.38, "sec": 2824, "pace": 7.38, "hr": 155, "hrMax": 168, "cal": 714, "elev": 0, "cad": 76, "name": "Afternoon Run"}, {"d": "2026-01-07", "km": 6.85, "sec": 2680, "pace": 6.52, "hr": 152, "hrMax": 167, "cal": 686, "elev": 0, "cad": 77, "name": "Evening Run"}, {"d": "2026-01-13", "km": 7.59, "sec": 2896, "pace": 6.36, "hr": 150, "hrMax": 169, "cal": 732, "elev": 67, "cad": 77, "name": "Evening Run"}, {"d": "2026-01-19", "km": 7.73, "sec": 2718, "pace": 5.86, "hr": null, "hrMax": null, "cal": 884, "elev": 28, "cad": null, "name": "Lauf am Nachmittag"}, {"d": "2026-01-23", "km": 15.26, "sec": 5957, "pace": 6.51, "hr": null, "hrMax": null, "cal": 1779, "elev": 123, "cad": null, "name": "Lauf am Abend"}, {"d": "2026-04-07", "km": 5.17, "sec": 1997, "pace": 6.43, "hr": null, "hrMax": null, "cal": 618, "elev": 50, "cad": null, "name": "comeback des Jahres"}];
+const GYM = [{"d": "2024-01-14", "t": "Push+Pull", "vol": 9457, "n": 7, "bench": [70.0, 10], "ex": [{"name": "Rudern", "w": 54.5, "s": 4, "r": 42, "v": 2043}, {"name": "Klimmzug", "w": 23.0, "s": 2, "r": 10, "v": 230}, {"name": "Bankdrücken", "w": 70.0, "s": 4, "r": 32, "v": 2140}, {"name": "Seitenheben", "w": 45.0, "s": 3, "r": 30, "v": 1350}, {"name": "Curls", "w": 15.0, "s": 3, "r": 24, "v": 360}, {"name": "Wadenpresse", "w": 100.0, "s": 3, "r": 34, "v": 2740}, {"name": "Beinstrecker", "w": 66.0, "s": 1, "r": 9, "v": 594}]}, {"d": "2024-02-01", "t": "Push+Beine", "vol": 7277, "n": 4, "bench": [80.0, 8], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 30, "v": 2200}, {"name": "Incline kurzhantel", "w": 40.0, "s": 2, "r": 16, "v": 640}, {"name": "Butterfly Maschine", "w": 82.0, "s": 1, "r": 8, "v": 656}, {"name": "Wadenpresse", "w": 113.0, "s": 4, "r": 37, "v": 3781}]}, {"d": "2024-11-17", "t": "Pull", "vol": 10556, "n": 4, "bench": null, "ex": [{"name": "Latpull", "w": 66.0, "s": 5, "r": 50, "v": 2859}, {"name": "Rudern", "w": 59.0, "s": 5, "r": 46, "v": 2518}, {"name": "Rückenstrecker", "w": 93.0, "s": 4, "r": 52, "v": 4724}, {"name": "Hammer Curls (Schmerzen im Unterarm vom Armdrücken)", "w": 17.5, "s": 3, "r": 26, "v": 455}]}, {"d": "2024-11-18", "t": "Push+Beine", "vol": 11355, "n": 5, "bench": [85.0, 7], "ex": [{"name": "Bankdrücken (scheiß Bänke)", "w": 85.0, "s": 4, "r": 21, "v": 1760}, {"name": "Seitenheben", "w": 50.0, "s": 3, "r": 32, "v": 1600}, {"name": "Schulterpresse unten (sehr scheiße die Maschine)", "w": 50.0, "s": 3, "r": 20, "v": 1000}, {"name": "Butterfly Maschine", "w": 50.0, "s": 3, "r": 22, "v": 1100}, {"name": "Wadenpresse", "w": 120.0, "s": 5, "r": 55, "v": 5895}]}, {"d": "2024-11-20", "t": "Pull+Beine", "vol": 9968, "n": 5, "bench": null, "ex": [{"name": "Hackenschmidt", "w": 40.0, "s": 4, "r": 36, "v": 1190}, {"name": "Rudern Arme unabhängig (sehe gut gespürt)", "w": 54.5, "s": 4, "r": 42, "v": 2043}, {"name": "Latzug", "w": 66.0, "s": 3, "r": 24, "v": 1472}, {"name": "Rückenstrecker", "w": 100.0, "s": 4, "r": 50, "v": 4790}, {"name": "Hummer Curls", "w": 17.5, "s": 3, "r": 27, "v": 472}]}, {"d": "2024-11-22", "t": "Push+Beine", "vol": 12687, "n": 7, "bench": [85.0, 8], "ex": [{"name": "Wadenpresse", "w": 120.0, "s": 5, "r": 60, "v": 6282}, {"name": "Bankdrücken", "w": 85.0, "s": 4, "r": 29, "v": 2265}, {"name": "Dips", "w": 14.0, "s": 2, "r": 20, "v": 230}, {"name": "Butterfly", "w": 100.0, "s": 2, "r": 15, "v": 1500}, {"name": "Schulterpresse", "w": 50.0, "s": 3, "r": 20, "v": 930}, {"name": "Frenchpress maschine (zum warten)", "w": 40.0, "s": 1, "r": 12, "v": 480}, {"name": "Seitenheben Maschine", "w": 50.0, "s": 2, "r": 20, "v": 1000}]}, {"d": "2024-11-25", "t": "Pull+Beine", "vol": 8514, "n": 6, "bench": null, "ex": [{"name": "Hackenschmidt", "w": 40.0, "s": 4, "r": 40, "v": 1275}, {"name": "Klimmzüge", "w": 23.0, "s": 3, "r": 24, "v": 356}, {"name": "Rudern", "w": 61.0, "s": 4, "r": 34, "v": 2009}, {"name": "Latzug", "w": 66.0, "s": 2, "r": 16, "v": 1000}, {"name": "Rückenstrecket", "w": 113.0, "s": 3, "r": 32, "v": 3349}, {"name": "Curls", "w": 17.5, "s": 4, "r": 30, "v": 525}]}, {"d": "2024-11-27", "t": "Push+Beine", "vol": 12730, "n": 5, "bench": [85.0, 8], "ex": [{"name": "Wadenpresse", "w": 127.0, "s": 5, "r": 61, "v": 6590}, {"name": "Bankdrücken", "w": 85.0, "s": 4, "r": 30, "v": 2350}, {"name": "Brustpresse decline oben", "w": 60.0, "s": 3, "r": 27, "v": 1620}, {"name": "Schulterpresse", "w": 45.0, "s": 3, "r": 26, "v": 1170}, {"name": "Seitenheben", "w": 50.0, "s": 2, "r": 20, "v": 1000}]}, {"d": "2024-11-29", "t": "Pull+Beine", "vol": 7303, "n": 5, "bench": null, "ex": [{"name": "Latzug", "w": 66.0, "s": 5, "r": 48, "v": 2776}, {"name": "Rudern", "w": 59.0, "s": 4, "r": 38, "v": 2242}, {"name": "Curls", "w": 17.5, "s": 3, "r": 22, "v": 385}, {"name": "Bizepsmaschine", "w": 41.0, "s": 2, "r": 20, "v": 820}, {"name": "Beinstrecker", "w": 73.0, "s": 2, "r": 18, "v": 1080}]}, {"d": "2024-12-02", "t": "Push+Beine", "vol": 12394, "n": 4, "bench": [90.0, 4], "ex": [{"name": "Wadenpresse (müde und 1,5 Tage nach schmeißen)", "w": 127.0, "s": 5, "r": 64, "v": 6854}, {"name": "Bankdrücken", "w": 90.0, "s": 4, "r": 23, "v": 1880}, {"name": "Brustpresse eng", "w": 60.0, "s": 3, "r": 30, "v": 1800}, {"name": "Seitenheben", "w": 55.0, "s": 4, "r": 42, "v": 1860}]}, {"d": "2024-12-04", "t": "Pull", "vol": 5094, "n": 3, "bench": null, "ex": [{"name": "Latzug unilateral", "w": 61.0, "s": 5, "r": 50, "v": 2672}, {"name": "Rudern", "w": 59.0, "s": 4, "r": 35, "v": 2002}, {"name": "Curls", "w": 17.5, "s": 4, "r": 24, "v": 420}]}, {"d": "2024-12-13", "t": "Push+Pull", "vol": 7108, "n": 4, "bench": [80.0, 8], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 7, "r": 60, "v": 4160}, {"name": "Latpull einzelne Griffe", "w": 61.0, "s": 4, "r": 34, "v": 1939}, {"name": "Rudern (Unterarme schon stark ermüdet)", "w": 61.0, "s": 2, "r": 16, "v": 904}, {"name": "Curls", "w": 17.5, "s": 1, "r": 6, "v": 105}]}, {"d": "2024-12-17", "t": "Push+Beine", "vol": 6998, "n": 4, "bench": [80.0, 8], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 30, "v": 2240}, {"name": "Seitenheben", "w": 50.0, "s": 5, "r": 46, "v": 2050}, {"name": "Butterfly", "w": 91.0, "s": 2, "r": 24, "v": 2124}, {"name": "Beinstrecker", "w": 73.0, "s": 1, "r": 8, "v": 584}]}, {"d": "2024-12-19", "t": "Pull+Beine", "vol": 9088, "n": 6, "bench": null, "ex": [{"name": "Latpull", "w": 61.0, "s": 3, "r": 30, "v": 1670}, {"name": "Ruder teil oben", "w": 40.0, "s": 3, "r": 24, "v": 960}, {"name": "Rudern Clean", "w": 54.5, "s": 3, "r": 30, "v": 1635}, {"name": "Curls", "w": 17.5, "s": 3, "r": 21, "v": 368}, {"name": "Bizepsmaschine", "w": 41.0, "s": 2, "r": 20, "v": 820}, {"name": "Wadenpresse", "w": 100.0, "s": 3, "r": 39, "v": 3636}]}, {"d": "2024-12-21", "t": "Push+Beine", "vol": 8829, "n": 4, "bench": [85.0, 8], "ex": [{"name": "Bankdrücken", "w": 85.0, "s": 4, "r": 26, "v": 2010}, {"name": "Butterfly", "w": 91.0, "s": 4, "r": 42, "v": 3822}, {"name": "Schulterpresse", "w": 40.0, "s": 3, "r": 29, "v": 1160}, {"name": "Beinstrecker", "w": 73.0, "s": 3, "r": 29, "v": 1837}]}, {"d": "2025-01-18", "t": "Push+Pull", "vol": 7985, "n": 5, "bench": [75.0, 8], "ex": [{"name": "Bankdrücken", "w": 75.0, "s": 4, "r": 30, "v": 2130}, {"name": "Latzug", "w": 66.0, "s": 4, "r": 35, "v": 1988}, {"name": "Schulterpresse", "w": 40.0, "s": 3, "r": 30, "v": 1200}, {"name": "Curls", "w": 17.5, "s": 3, "r": 22, "v": 385}, {"name": "Beinstrecker", "w": 73.0, "s": 4, "r": 35, "v": 2282}]}, {"d": "2025-01-22", "t": "Push+Pull", "vol": 5534, "n": 4, "bench": [80.0, 7], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 26, "v": 1920}, {"name": "Latzug", "w": 66.0, "s": 4, "r": 34, "v": 1974}, {"name": "Schulterpresse", "w": 40.0, "s": 3, "r": 34, "v": 1360}, {"name": "Curls", "w": 17.5, "s": 2, "r": 16, "v": 280}]}, {"d": "2025-01-24", "t": "Push+Pull", "vol": 10370, "n": 4, "bench": [80.0, 7], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 24, "v": 1760}, {"name": "Latzug", "w": 59.0, "s": 4, "r": 40, "v": 2220}, {"name": "Seitenheben", "w": 50.0, "s": 3, "r": 30, "v": 1500}, {"name": "Wadenpresse", "w": 100.0, "s": 5, "r": 53, "v": 4890}]}, {"d": "2025-01-26", "t": "Pull+Beine", "vol": 6496, "n": 6, "bench": null, "ex": [{"name": "Klimmzug", "w": 27.0, "s": 2, "r": 16, "v": 432}, {"name": "Rudern Kabel", "w": 59.0, "s": 4, "r": 40, "v": 2220}, {"name": "Latzug unilateral", "w": 61.0, "s": 4, "r": 32, "v": 1848}, {"name": "Curls", "w": 17.5, "s": 3, "r": 21, "v": 368}, {"name": "Hackenschmidt", "w": 20.0, "s": 3, "r": 24, "v": 480}, {"name": "Bizepsmaschine", "w": 41.0, "s": 3, "r": 28, "v": 1148}]}, {"d": "2025-01-28", "t": "Push", "vol": 4885, "n": 3, "bench": null, "ex": [{"name": "Bandrücken", "w": 80.0, "s": 4, "r": 27, "v": 2000}, {"name": "Seitenheben", "w": 55.0, "s": 3, "r": 24, "v": 1320}, {"name": "Butterfly Maschine", "w": 50.0, "s": 4, "r": 33, "v": 1565}]}, {"d": "2025-01-30", "t": "Push+Pull", "vol": 7818, "n": 5, "bench": null, "ex": [{"name": "Latpull", "w": 66.0, "s": 5, "r": 44, "v": 2652}, {"name": "Rudern, mit schulterblätter zusammenziehen)", "w": 52.0, "s": 4, "r": 37, "v": 1924}, {"name": "Butterfly reverse", "w": 52.0, "s": 3, "r": 24, "v": 1122}, {"name": "Curls", "w": 17.5, "s": 3, "r": 24, "v": 420}, {"name": "Beinbeuger", "w": 59.0, "s": 3, "r": 30, "v": 1700}]}, {"d": "2025-02-03", "t": "Pull", "vol": 5385, "n": 6, "bench": null, "ex": [{"name": "Klimmzug", "w": 23.0, "s": 3, "r": 23, "v": 449}, {"name": "Power grip wide", "w": 66.0, "s": 2, "r": 16, "v": 1056}, {"name": "Rudern", "w": 59.0, "s": 4, "r": 37, "v": 1973}, {"name": "Curls (nach Armwrestling und Verletzung in Hand, Hornhaut abgerissen)", "w": 17.5, "s": 2, "r": 10, "v": 175}, {"name": "Bizepsmaschine", "w": 36.0, "s": 2, "r": 17, "v": 612}, {"name": "Hackenschmitd", "w": 40.0, "s": 4, "r": 32, "v": 1120}]}, {"d": "2025-02-12", "t": "Push+Pull", "vol": 5506, "n": 5, "bench": [80.0, 7], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 26, "v": 1920}, {"name": "Power grip", "w": 66.0, "s": 1, "r": 5, "v": 330}, {"name": "Schulterpresse", "w": 40.0, "s": 3, "r": 30, "v": 1200}, {"name": "Hackenschmidt", "w": 20.0, "s": 1, "r": 8, "v": 160}, {"name": "Wadenheben", "w": 93.0, "s": 2, "r": 27, "v": 1896}]}, {"d": "2025-02-21", "t": "Push+Pull", "vol": 6378, "n": 4, "bench": [80.0, 8], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 32, "v": 2180}, {"name": "Butterfly", "w": 79.0, "s": 2, "r": 18, "v": 1422}, {"name": "Latzug power grip Mittel", "w": 73.0, "s": 4, "r": 29, "v": 1795}, {"name": "Rudern", "w": 54.5, "s": 2, "r": 18, "v": 981}]}, {"d": "2025-02-26", "t": "Push", "vol": 1080, "n": 1, "bench": [80.0, 6], "ex": [{"name": "Bankdrücken (noch Sehnen im Ellbogen angeschlagen)", "w": 80.0, "s": 2, "r": 16, "v": 1080}]}, {"d": "2025-02-28", "t": "Push+Pull", "vol": 8772, "n": 5, "bench": [80.0, 7], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 29, "v": 2000}, {"name": "Butterfly", "w": 86.0, "s": 3, "r": 36, "v": 3096}, {"name": "Latzug", "w": 66.0, "s": 3, "r": 26, "v": 1716}, {"name": "Rudern", "w": 52.0, "s": 3, "r": 30, "v": 1560}, {"name": "Schulterpresse", "w": 40.0, "s": 1, "r": 10, "v": 400}]}, {"d": "2025-03-04", "t": "Push+Beine", "vol": 9656, "n": 4, "bench": null, "ex": [{"name": "Brustpresse decline eng", "w": 70.0, "s": 5, "r": 52, "v": 2700}, {"name": "Butterfly", "w": 86.0, "s": 3, "r": 33, "v": 2838}, {"name": "Schulterpresse", "w": 50.0, "s": 5, "r": 42, "v": 1340}, {"name": "Wadenheben", "w": 113.0, "s": 2, "r": 30, "v": 2778}]}, {"d": "2025-03-05", "t": "Pull", "vol": 5103, "n": 3, "bench": null, "ex": [{"name": "Latzug", "w": 66.0, "s": 5, "r": 46, "v": 2693}, {"name": "T bar Rudern oben", "w": 40.0, "s": 4, "r": 33, "v": 1230}, {"name": "Beingeuger", "w": 66.0, "s": 2, "r": 20, "v": 1180}]}, {"d": "2025-03-08", "t": "Push+Beine", "vol": 10301, "n": 6, "bench": null, "ex": [{"name": "Brustpresse eng", "w": 70.0, "s": 5, "r": 39, "v": 2430}, {"name": "Butterfly", "w": 86.0, "s": 3, "r": 35, "v": 2926}, {"name": "Schulterpresse", "w": 50.0, "s": 4, "r": 31, "v": 1310}, {"name": "Seitenheben", "w": 50.0, "s": 4, "r": 36, "v": 1620}, {"name": "Hacksquats", "w": 40.0, "s": 3, "r": 28, "v": 920}, {"name": "Wadenheben", "w": 73.0, "s": 1, "r": 15, "v": 1095}]}, {"d": "2025-03-14", "t": "Push+Pull", "vol": 11092, "n": 6, "bench": null, "ex": [{"name": "Brustpresse maschine", "w": 70.0, "s": 5, "r": 45, "v": 2700}, {"name": "Butterfly Maschine", "w": 86.0, "s": 3, "r": 30, "v": 2580}, {"name": "Latzug breit", "w": 66.0, "s": 4, "r": 35, "v": 2079}, {"name": "Rudern", "w": 61.0, "s": 3, "r": 28, "v": 1508}, {"name": "Schulterpresse", "w": 50.0, "s": 4, "r": 34, "v": 1460}, {"name": "Seitenheben", "w": 45.0, "s": 2, "r": 17, "v": 765}]}, {"d": "2025-03-20", "t": "Push+Pull", "vol": 8659, "n": 5, "bench": [80.0, 5], "ex": [{"name": "Latzug", "w": 66.0, "s": 5, "r": 51, "v": 2751}, {"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 28, "v": 1680}, {"name": "Butterfly", "w": 93.0, "s": 2, "r": 24, "v": 2148}, {"name": "Seitenheben", "w": 45.0, "s": 3, "r": 32, "v": 1440}, {"name": "Hacksquads", "w": 40.0, "s": 2, "r": 16, "v": 640}]}, {"d": "2025-03-25", "t": "Push+Beine", "vol": 9781, "n": 5, "bench": null, "ex": [{"name": "Decline benchpress oben", "w": 60.0, "s": 4, "r": 46, "v": 2220}, {"name": "Wadenheben", "w": 102.3, "s": 3, "r": 38, "v": 3238}, {"name": "Butterfly Br3a", "w": 36.0, "s": 1, "r": 10, "v": 360}, {"name": "Butterfly", "w": 93.0, "s": 3, "r": 29, "v": 2613}, {"name": "Schulterpresse", "w": 50.0, "s": 4, "r": 36, "v": 1350}]}, {"d": "2025-03-26", "t": "Pull+Beine", "vol": 6334, "n": 5, "bench": null, "ex": [{"name": "Latzug", "w": 66.0, "s": 5, "r": 44, "v": 2736}, {"name": "Rudern", "w": 59.0, "s": 4, "r": 35, "v": 2065}, {"name": "Hammer Curls", "w": 17.5, "s": 2, "r": 15, "v": 262}, {"name": "Curls", "w": 17.5, "s": 2, "r": 12, "v": 210}, {"name": "Hackenschmidt", "w": 60.0, "s": 3, "r": 27, "v": 1060}]}, {"d": "2025-03-31", "t": "Push+Beine", "vol": 3356, "n": 2, "bench": null, "ex": [{"name": "Brustpresse Ellbogenschmerzen", "w": 60.0, "s": 4, "r": 34, "v": 1840}, {"name": "Br3a", "w": 39.9, "s": 4, "r": 38, "v": 1516}]}, {"d": "2025-04-02", "t": "Pull+Beine", "vol": 3761, "n": 3, "bench": null, "ex": [{"name": "Latzug beide Hände einzeln", "w": 68.0, "s": 4, "r": 30, "v": 1876}, {"name": "Rudern", "w": 54.5, "s": 1, "r": 10, "v": 545}, {"name": "Hackenschmidt sauber und mit Füßen weiter unten", "w": 60.0, "s": 3, "r": 27, "v": 1340}]}, {"d": "2025-04-03", "t": "Push+Beine", "vol": 9230, "n": 5, "bench": null, "ex": [{"name": "Brustpresse eng", "w": 60.0, "s": 4, "r": 47, "v": 2220}, {"name": "Butterfly", "w": 93.0, "s": 3, "r": 27, "v": 2511}, {"name": "Schulterpresse", "w": 50.0, "s": 4, "r": 34, "v": 1240}, {"name": "V Stange", "w": 27.0, "s": 4, "r": 36, "v": 924}, {"name": "Wadenpresse", "w": 107.0, "s": 2, "r": 25, "v": 2335}]}, {"d": "2025-04-08", "t": "Push+Beine", "vol": 14246, "n": 6, "bench": [80.0, 8], "ex": [{"name": "Wadenpresse", "w": 113.0, "s": 5, "r": 74, "v": 7102}, {"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 27, "v": 2000}, {"name": "Dips", "w": 9.0, "s": 2, "r": 16, "v": 144}, {"name": "Butterfly", "w": 100.0, "s": 3, "r": 26, "v": 2600}, {"name": "Schulterpresse", "w": 50.0, "s": 3, "r": 24, "v": 1200}, {"name": "Seitenheben", "w": 50.0, "s": 3, "r": 24, "v": 1200}]}, {"d": "2025-04-09", "t": "Pull+Beine", "vol": 6652, "n": 6, "bench": null, "ex": [{"name": "Latpull", "w": 66.0, "s": 4, "r": 43, "v": 2544}, {"name": "Rudern", "w": 59.0, "s": 3, "r": 33, "v": 1947}, {"name": "Hammer Curls", "w": 17.5, "s": 2, "r": 17, "v": 298}, {"name": "Curls", "w": 17.5, "s": 2, "r": 12, "v": 210}, {"name": "Hackenschmidt", "w": 40.0, "s": 1, "r": 10, "v": 400}, {"name": "Beinstrecker", "w": 66.0, "s": 2, "r": 19, "v": 1254}]}, {"d": "2025-04-12", "t": "Push+Beine", "vol": 8872, "n": 4, "bench": [80.0, 8], "ex": [{"name": "Bankdrücken laaqmge Pausen", "w": 80.0, "s": 4, "r": 33, "v": 2440}, {"name": "Decline benchoress maschine", "w": 60.0, "s": 4, "r": 38, "v": 2280}, {"name": "Seitenheben", "w": 50.0, "s": 3, "r": 30, "v": 1330}, {"name": "Wadenheben (schön in den stretch)", "w": 100.0, "s": 2, "r": 32, "v": 2822}]}, {"d": "2025-04-16", "t": "Push+Beine", "vol": 9625, "n": 5, "bench": [80.0, 6], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 27, "v": 1680}, {"name": "Brustpresse oben eng", "w": 60.0, "s": 3, "r": 29, "v": 1740}, {"name": "Butterfly", "w": 93.0, "s": 3, "r": 28, "v": 2604}, {"name": "Seitenheben", "w": 50.0, "s": 2, "r": 22, "v": 920}, {"name": "Wadenheben", "w": 107.0, "s": 2, "r": 28, "v": 2681}]}, {"d": "2025-04-17", "t": "Pull+Beine", "vol": 6226, "n": 4, "bench": null, "ex": [{"name": "Klimmzug", "w": 23.0, "s": 2, "r": 16, "v": 328}, {"name": "Rudern", "w": 66.0, "s": 4, "r": 39, "v": 2483}, {"name": "Latzug", "w": 66.0, "s": 3, "r": 23, "v": 1455}, {"name": "Hacksquats", "w": 60.0, "s": 5, "r": 42, "v": 1960}]}, {"d": "2025-04-19", "t": "Push+Beine", "vol": 12130, "n": 4, "bench": [80.0, 8], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 5, "r": 40, "v": 2760}, {"name": "Butterfly", "w": 93.0, "s": 3, "r": 31, "v": 2883}, {"name": "Schulterpresse", "w": 50.0, "s": 4, "r": 31, "v": 1450}, {"name": "Wadenpresse", "w": 107.0, "s": 4, "r": 51, "v": 5037}]}, {"d": "2025-05-14", "t": "Push+Pull", "vol": 4548, "n": 3, "bench": [70.0, 8], "ex": [{"name": "Bankdrücken", "w": 70.0, "s": 4, "r": 34, "v": 2180}, {"name": "Latzug", "w": 59.0, "s": 4, "r": 38, "v": 2098}, {"name": "Hammer Curls", "w": 15.0, "s": 2, "r": 18, "v": 270}]}, {"d": "2025-05-15", "t": "Beine", "vol": 3316, "n": 2, "bench": null, "ex": [{"name": "Beinstrecker", "w": 66.0, "s": 5, "r": 49, "v": 2744}, {"name": "Beinbeuger", "w": 52.0, "s": 1, "r": 11, "v": 572}]}, {"d": "2025-05-21", "t": "Push+Pull", "vol": 5854, "n": 3, "bench": [70.0, 8], "ex": [{"name": "Bankdrücken", "w": 70.0, "s": 4, "r": 32, "v": 2160}, {"name": "Butterfly", "w": 86.0, "s": 2, "r": 20, "v": 1720}, {"name": "Latzug", "w": 66.0, "s": 4, "r": 34, "v": 1974}]}, {"d": "2025-06-18", "t": "Push+Pull", "vol": 3800, "n": 2, "bench": [60.0, 8], "ex": [{"name": "Bankdrücken", "w": 60.0, "s": 4, "r": 32, "v": 1920}, {"name": "Latzug eng", "w": 59.0, "s": 4, "r": 34, "v": 1880}]}, {"d": "2025-06-25", "t": "Push+Pull", "vol": 5261, "n": 4, "bench": [70.0, 8], "ex": [{"name": "Bankdrücken", "w": 70.0, "s": 4, "r": 28, "v": 1880}, {"name": "Latzug breit", "w": 66.0, "s": 5, "r": 41, "v": 2405}, {"name": "Curls", "w": 15.0, "s": 4, "r": 32, "v": 480}, {"name": "Schulterpresse maschine", "w": 31.0, "s": 2, "r": 16, "v": 496}]}, {"d": "2025-07-01", "t": "Push+Pull", "vol": 5932, "n": 4, "bench": [70.0, 8], "ex": [{"name": "Bankdrücken", "w": 70.0, "s": 4, "r": 31, "v": 2090}, {"name": "Rudern", "w": 54.5, "s": 4, "r": 48, "v": 2370}, {"name": "Latzug", "w": 59.0, "s": 1, "r": 8, "v": 472}, {"name": "Schulterpresse", "w": 40.0, "s": 3, "r": 28, "v": 1000}]}, {"d": "2025-07-04", "t": "Push+Pull", "vol": 4234, "n": 2, "bench": [80.0, 6], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 5, "r": 32, "v": 2200}, {"name": "Latzug", "w": 66.0, "s": 4, "r": 34, "v": 2034}]}, {"d": "2025-07-08", "t": "Push+Pull", "vol": 1680, "n": 1, "bench": [80.0, 7], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 23, "v": 1680}]}, {"d": "2025-07-11", "t": "Push+Pull", "vol": 8514, "n": 6, "bench": [80.0, 8], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 27, "v": 2000}, {"name": "Butterfly", "w": 93.0, "s": 2, "r": 22, "v": 2046}, {"name": "Seitenheben", "w": 45.0, "s": 3, "r": 32, "v": 1440}, {"name": "Latzug breit", "w": 66.0, "s": 3, "r": 28, "v": 1708}, {"name": "Rudern", "w": 52.0, "s": 2, "r": 20, "v": 1040}, {"name": "Hammer Curls", "w": 20.0, "s": 3, "r": 14, "v": 280}]}, {"d": "2025-07-14", "t": "Push+Pull", "vol": 7026, "n": 7, "bench": null, "ex": [{"name": "Brustpresse eng", "w": 60.0, "s": 5, "r": 44, "v": 2380}, {"name": "Butterfly", "w": 93.0, "s": 2, "r": 16, "v": 1488}, {"name": "Schulterpresse unten", "w": 32.0, "s": 3, "r": 26, "v": 832}, {"name": "Latzug unilateral", "w": 54.5, "s": 1, "r": 8, "v": 436}, {"name": "Rudern", "w": 52.0, "s": 3, "r": 25, "v": 1300}, {"name": "Hammercurls", "w": 20.0, "s": 3, "r": 16, "v": 320}, {"name": "Bizepsmaschine", "w": 54.0, "s": 1, "r": 5, "v": 270}]}, {"d": "2025-07-18", "t": "Push", "vol": 1840, "n": 1, "bench": [80.0, 7], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 25, "v": 1840}]}, {"d": "2025-08-05", "t": "Push+Pull", "vol": 4874, "n": 3, "bench": [70.0, 8], "ex": [{"name": "Bankdrücken", "w": 70.0, "s": 4, "r": 34, "v": 2200}, {"name": "Latzug", "w": 66.0, "s": 4, "r": 34, "v": 2174}, {"name": "Preacher Curls maschine", "w": 50.0, "s": 1, "r": 10, "v": 500}]}, {"d": "2025-08-08", "t": "Push+Pull", "vol": 6980, "n": 5, "bench": [80.0, 7], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 27, "v": 2000}, {"name": "Butterfly", "w": 93.0, "s": 2, "r": 20, "v": 1860}, {"name": "Seitenheben maschine", "w": 45.0, "s": 3, "r": 30, "v": 1350}, {"name": "Hammer Curls", "w": 20.0, "s": 1, "r": 7, "v": 140}, {"name": "Beinstrecker", "w": 59.0, "s": 3, "r": 30, "v": 1630}]}, {"d": "2025-08-13", "t": "Push", "vol": 2824, "n": 2, "bench": [80.0, 8], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 28, "v": 2080}, {"name": "Butterfly", "w": 93.0, "s": 1, "r": 8, "v": 744}]}, {"d": "2025-08-16", "t": "Push+Pull", "vol": 9435, "n": 5, "bench": [80.0, 8], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 29, "v": 2160}, {"name": "Butterfly", "w": 100.0, "s": 2, "r": 18, "v": 1800}, {"name": "Seitenheben", "w": 50.0, "s": 4, "r": 36, "v": 1560}, {"name": "Latzug", "w": 66.0, "s": 4, "r": 39, "v": 2392}, {"name": "Rudern", "w": 59.0, "s": 3, "r": 27, "v": 1523}]}, {"d": "2025-08-20", "t": "Push+Pull", "vol": 8738, "n": 4, "bench": [80.0, 8], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 5, "r": 33, "v": 2480}, {"name": "Butterfly", "w": 103.0, "s": 2, "r": 19, "v": 1957}, {"name": "Latzug", "w": 66.0, "s": 4, "r": 40, "v": 2472}, {"name": "Rudern", "w": 59.0, "s": 4, "r": 31, "v": 1829}]}, {"d": "2025-08-22", "t": "Push+Beine", "vol": 8112, "n": 4, "bench": null, "ex": [{"name": "Schulterpresse", "w": 50.0, "s": 4, "r": 39, "v": 1830}, {"name": "Seitenheben", "w": 50.0, "s": 3, "r": 24, "v": 1200}, {"name": "Hackenschmidt", "w": 40.0, "s": 2, "r": 13, "v": 520}, {"name": "Wadenheben", "w": 107.0, "s": 4, "r": 48, "v": 4562}]}, {"d": "2025-08-26", "t": "Push+Pull", "vol": 17680, "n": 9, "bench": [80.0, 8], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 30, "v": 2240}, {"name": "Schulterpresse", "w": 50.0, "s": 4, "r": 32, "v": 1500}, {"name": "Decline maschine", "w": 50.0, "s": 2, "r": 18, "v": 900}, {"name": "Latzug", "w": 66.0, "s": 10, "r": 92, "v": 5568}, {"name": "Rudern", "w": 59.0, "s": 3, "r": 24, "v": 1416}, {"name": "Bank press", "w": 80.0, "s": 4, "r": 30, "v": 2240}, {"name": "Shoulder press", "w": 50.0, "s": 4, "r": 32, "v": 1500}, {"name": "Decline machine", "w": 50.0, "s": 2, "r": 18, "v": 900}, {"name": "Rowing", "w": 59.0, "s": 3, "r": 24, "v": 1416}]}, {"d": "2025-08-29", "t": "Push+Pull", "vol": 9695, "n": 5, "bench": [85.0, 6], "ex": [{"name": "Bankdrücken", "w": 85.0, "s": 5, "r": 31, "v": 2405}, {"name": "Butterfly", "w": 103.0, "s": 3, "r": 28, "v": 2884}, {"name": "Latzug", "w": 66.0, "s": 3, "r": 26, "v": 1548}, {"name": "Rudern", "w": 61.0, "s": 3, "r": 28, "v": 1708}, {"name": "Schulterpresse", "w": 50.0, "s": 3, "r": 25, "v": 1150}]}, {"d": "2025-09-03", "t": "Push+Pull", "vol": 9152, "n": 5, "bench": [85.0, 7], "ex": [{"name": "Bankdrücken", "w": 85.0, "s": 4, "r": 25, "v": 1925}, {"name": "Butterfly", "w": 103.0, "s": 3, "r": 23, "v": 2369}, {"name": "Rudern separat", "w": 54.0, "s": 4, "r": 38, "v": 1852}, {"name": "Latzug", "w": 66.0, "s": 4, "r": 27, "v": 1726}, {"name": "Seitenheben", "w": 50.0, "s": 3, "r": 28, "v": 1280}]}, {"d": "2025-09-06", "t": "Push+Pull", "vol": 8961, "n": 5, "bench": [85.0, 8], "ex": [{"name": "Bankdrücken", "w": 85.0, "s": 4, "r": 26, "v": 2010}, {"name": "Brustpresse decline Maschine", "w": 60.0, "s": 3, "r": 26, "v": 1560}, {"name": "Latzug", "w": 66.0, "s": 4, "r": 37, "v": 2211}, {"name": "Rudern", "w": 61.0, "s": 3, "r": 30, "v": 1830}, {"name": "Seitenheben", "w": 50.0, "s": 3, "r": 27, "v": 1350}]}, {"d": "2025-09-10", "t": "Push", "vol": 4700, "n": 2, "bench": [90.0, 4], "ex": [{"name": "Bankdrücken", "w": 90.0, "s": 5, "r": 30, "v": 2320}, {"name": "Seitenheben", "w": 50.0, "s": 5, "r": 54, "v": 2380}]}, {"d": "2025-09-14", "t": "Push+Pull", "vol": 9674, "n": 5, "bench": [90.0, 4], "ex": [{"name": "Bankdrücken", "w": 90.0, "s": 6, "r": 35, "v": 2750}, {"name": "Butterfly", "w": 93.0, "s": 3, "r": 27, "v": 2511}, {"name": "Latzug", "w": 66.0, "s": 3, "r": 30, "v": 1728}, {"name": "Rudern teil oben", "w": 35.0, "s": 3, "r": 29, "v": 1015}, {"name": "Seitenheben", "w": 55.0, "s": 4, "r": 34, "v": 1670}]}, {"d": "2025-09-25", "t": "Push+Pull", "vol": 3446, "n": 2, "bench": [80.0, 8], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 27, "v": 2000}, {"name": "Latpull", "w": 66.0, "s": 3, "r": 26, "v": 1446}]}, {"d": "2025-10-22", "t": "Push+Pull", "vol": 4294, "n": 3, "bench": [70.0, 8], "ex": [{"name": "Bankdrücken", "w": 70.0, "s": 4, "r": 31, "v": 2090}, {"name": "Latzug dual handle", "w": 61.0, "s": 4, "r": 28, "v": 1548}, {"name": "Bizepsmaschine", "w": 41.0, "s": 2, "r": 16, "v": 656}]}, {"d": "2025-10-27", "t": "Push+Pull", "vol": 4659, "n": 2, "bench": [70.0, 8], "ex": [{"name": "Bankdrücken", "w": 70.0, "s": 5, "r": 40, "v": 2720}, {"name": "Latzug separat", "w": 61.0, "s": 4, "r": 34, "v": 1939}]}, {"d": "2025-11-03", "t": "Push+Pull", "vol": 7863, "n": 3, "bench": [80.0, 6], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 25, "v": 1840}, {"name": "Latpull einzelne Griffe", "w": 61.0, "s": 4, "r": 36, "v": 1931}, {"name": "Wadenpresse", "w": 100.0, "s": 4, "r": 45, "v": 4092}]}, {"d": "2025-11-10", "t": "Push+Pull", "vol": 9262, "n": 7, "bench": [80.0, 6], "ex": [{"name": "Latzug", "w": 66.0, "s": 4, "r": 34, "v": 1978}, {"name": "Rudern", "w": 52.0, "s": 2, "r": 20, "v": 1040}, {"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 25, "v": 1820}, {"name": "Butterfly", "w": 86.0, "s": 3, "r": 24, "v": 2064}, {"name": "Schulterpresse", "w": 20.0, "s": 3, "r": 24, "v": 380}, {"name": "Seitenheben", "w": 40.0, "s": 2, "r": 22, "v": 880}, {"name": "Bizepsmaschine", "w": 50.0, "s": 3, "r": 22, "v": 1100}]}, {"d": "2025-11-15", "t": "Push+Pull", "vol": 4548, "n": 3, "bench": [80.0, 7], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 5, "r": 33, "v": 2320}, {"name": "Latzug", "w": 66.0, "s": 4, "r": 30, "v": 1812}, {"name": "Rudern", "w": 52.0, "s": 1, "r": 8, "v": 416}]}, {"d": "2025-11-17", "t": "Push+Pull", "vol": 7686, "n": 5, "bench": [80.0, 7], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 26, "v": 1920}, {"name": "Latzug", "w": 66.0, "s": 4, "r": 36, "v": 2124}, {"name": "Bizepsmaschine", "w": 50.0, "s": 3, "r": 19, "v": 950}, {"name": "Hacksquats", "w": 35.0, "s": 3, "r": 24, "v": 600}, {"name": "Wadenpresse", "w": 104.6, "s": 2, "r": 20, "v": 2092}]}, {"d": "2025-11-20", "t": "Push+Pull", "vol": 9560, "n": 6, "bench": [80.0, 8], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 27, "v": 2000}, {"name": "Butterfly", "w": 93.0, "s": 3, "r": 28, "v": 2604}, {"name": "Latzug", "w": 66.0, "s": 4, "r": 36, "v": 2124}, {"name": "Rudern", "w": 61.0, "s": 3, "r": 24, "v": 1464}, {"name": "Schulterpresse", "w": 40.0, "s": 3, "r": 25, "v": 1000}, {"name": "Hammer Curls", "w": 17.5, "s": 3, "r": 21, "v": 368}]}, {"d": "2025-11-23", "t": "Push", "vol": 1680, "n": 1, "bench": [80.0, 8], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 3, "r": 21, "v": 1680}]}, {"d": "2025-11-26", "t": "Push+Pull", "vol": 5720, "n": 4, "bench": [80.0, 8], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 30, "v": 2220}, {"name": "Butterfly dumme maschine", "w": 50.0, "s": 2, "r": 15, "v": 750}, {"name": "Latzug einzelne Griffe", "w": 61.0, "s": 4, "r": 34, "v": 1952}, {"name": "Rudern einzeln", "w": 61.0, "s": 2, "r": 14, "v": 798}]}, {"d": "2025-11-28", "t": "Beine", "vol": 10402, "n": 5, "bench": null, "ex": [{"name": "Hackenschmidt", "w": 40.0, "s": 3, "r": 24, "v": 800}, {"name": "Beinstrecker", "w": 66.0, "s": 3, "r": 24, "v": 1528}, {"name": "Beinbeuger", "w": 52.0, "s": 2, "r": 21, "v": 1092}, {"name": "Wadenheben", "w": 113.0, "s": 4, "r": 44, "v": 4192}, {"name": "Rückenstrecker", "w": 100.0, "s": 3, "r": 30, "v": 2790}]}, {"d": "2025-12-03", "t": "Push+Pull", "vol": 560, "n": 1, "bench": null, "ex": [{"name": "Butterfly", "w": 70.0, "s": 1, "r": 8, "v": 560}]}, {"d": "2025-12-05", "t": "Sonstiges", "vol": 0, "n": 0, "bench": null, "ex": []}, {"d": "2025-12-08", "t": "Pull+Beine", "vol": 13600, "n": 7, "bench": null, "ex": [{"name": "Latzug", "w": 80.0, "s": 4, "r": 33, "v": 2590}, {"name": "Rudern", "w": 70.0, "s": 4, "r": 38, "v": 2460}, {"name": "Latpull Maschine", "w": 90.0, "s": 2, "r": 16, "v": 1440}, {"name": "Scott Bank", "w": 10.0, "s": 3, "r": 24, "v": 240}, {"name": "Hammer Curls", "w": 14.0, "s": 2, "r": 20, "v": 280}, {"name": "Wadenpresse", "w": 85.0, "s": 5, "r": 52, "v": 4270}, {"name": "Bauchmaschine", "w": 80.0, "s": 3, "r": 29, "v": 2320}]}, {"d": "2025-12-10", "t": "Push", "vol": 4764, "n": 4, "bench": [85.0, 7], "ex": [{"name": "Bankdrücken", "w": 85.0, "s": 4, "r": 25, "v": 1925}, {"name": "Butterfly", "w": 85.0, "s": 4, "r": 24, "v": 1944}, {"name": "Schulterpresse", "w": 15.0, "s": 4, "r": 33, "v": 495}, {"name": "Schrägbank maschine", "w": 40.0, "s": 1, "r": 10, "v": 400}]}, {"d": "2025-12-16", "t": "Pull+Beine", "vol": 8901, "n": 7, "bench": null, "ex": [{"name": "Klimmzug", "w": 40.0, "s": 4, "r": 28, "v": 760}, {"name": "Latzug powergrip mittelweit", "w": 75.0, "s": 4, "r": 28, "v": 2100}, {"name": "Rudern", "w": 65.0, "s": 4, "r": 33, "v": 2105}, {"name": "Hammer Curls", "w": 16.0, "s": 1, "r": 11, "v": 176}, {"name": "Scott Bank maschine", "w": 50.0, "s": 3, "r": 18, "v": 900}, {"name": "Beinbeuger liegend", "w": 50.0, "s": 3, "r": 24, "v": 1200}, {"name": "Wadenpresse", "w": 80.0, "s": 2, "r": 22, "v": 1660}]}, {"d": "2025-12-17", "t": "Push", "vol": 2230, "n": 1, "bench": [85.0, 8], "ex": [{"name": "Bankdrücken", "w": 85.0, "s": 4, "r": 28, "v": 2230}]}, {"d": "2026-01-02", "t": "Push+Pull", "vol": 6728, "n": 4, "bench": null, "ex": [{"name": "Brustpresse", "w": 80.0, "s": 4, "r": 26, "v": 1920}, {"name": "Butterfly", "w": 93.0, "s": 2, "r": 18, "v": 1618}, {"name": "Latpull", "w": 75.0, "s": 4, "r": 30, "v": 2150}, {"name": "Rudern", "w": 52.0, "s": 2, "r": 20, "v": 1040}]}, {"d": "2026-01-03", "t": "Beine", "vol": 8960, "n": 4, "bench": null, "ex": [{"name": "Hackenschmidt", "w": 40.0, "s": 3, "r": 24, "v": 800}, {"name": "Beinstrecker", "w": 66.0, "s": 4, "r": 32, "v": 2112}, {"name": "Beinbeuger sitzend", "w": 66.0, "s": 3, "r": 28, "v": 1708}, {"name": "Wadenpresse", "w": 107.0, "s": 4, "r": 42, "v": 4340}]}, {"d": "2026-01-06", "t": "Push", "vol": 5800, "n": 3, "bench": [80.0, 8], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 27, "v": 2000}, {"name": "Butterfly", "w": 100.0, "s": 3, "r": 26, "v": 2600}, {"name": "Schulterpresse", "w": 40.0, "s": 3, "r": 30, "v": 1200}]}, {"d": "2026-01-07", "t": "Pull", "vol": 1744, "n": 1, "bench": null, "ex": [{"name": "Latzug maschine neu", "w": 109.0, "s": 2, "r": 16, "v": 1744}]}, {"d": "2026-01-10", "t": "Push+Beine", "vol": 9459, "n": 7, "bench": [80.0, 8], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 27, "v": 2000}, {"name": "Dip Maschine", "w": 93.0, "s": 2, "r": 16, "v": 1488}, {"name": "Butterfly", "w": 100.0, "s": 2, "r": 17, "v": 1700}, {"name": "Seitenheben Maschine", "w": 55.0, "s": 3, "r": 23, "v": 1265}, {"name": "Schulterpresse", "w": 50.0, "s": 3, "r": 17, "v": 850}, {"name": "Hacksquats", "w": 50.0, "s": 3, "r": 24, "v": 1100}, {"name": "Beinstrecker", "w": 66.0, "s": 2, "r": 16, "v": 1056}]}, {"d": "2026-01-11", "t": "Pull+Beine", "vol": 14601, "n": 7, "bench": null, "ex": [{"name": "Klimmzug", "w": 32.0, "s": 4, "r": 34, "v": 802}, {"name": "Rudern", "w": 59.0, "s": 4, "r": 36, "v": 2124}, {"name": "Latzug power grip weit", "w": 66.0, "s": 3, "r": 23, "v": 1462}, {"name": "Hammer Curls", "w": 17.5, "s": 2, "r": 18, "v": 315}, {"name": "Curls Maschine", "w": 50.0, "s": 3, "r": 18, "v": 900}, {"name": "Beinbeuger", "w": 66.0, "s": 4, "r": 36, "v": 2166}, {"name": "Wadenheben", "w": 113.0, "s": 6, "r": 68, "v": 6832}]}, {"d": "2026-01-13", "t": "Push", "vol": 5295, "n": 4, "bench": [85.0, 7], "ex": [{"name": "Bankdrücken", "w": 85.0, "s": 4, "r": 23, "v": 1755}, {"name": "Butterfly", "w": 100.0, "s": 2, "r": 20, "v": 2000}, {"name": "Schulterpresse", "w": 50.0, "s": 4, "r": 24, "v": 1140}, {"name": "Seitenheben", "w": 50.0, "s": 1, "r": 8, "v": 400}]}, {"d": "2026-01-17", "t": "Pull+Beine", "vol": 1246, "n": 2, "bench": null, "ex": [{"name": "Latzug breit", "w": 59.0, "s": 2, "r": 14, "v": 826}, {"name": "Hammer Curls", "w": 17.5, "s": 3, "r": 24, "v": 420}]}, {"d": "2026-01-18", "t": "Push", "vol": 4400, "n": 4, "bench": [85.0, 5], "ex": [{"name": "Bankdrücken", "w": 85.0, "s": 5, "r": 27, "v": 1760}, {"name": "Decline maschine", "w": 60.0, "s": 2, "r": 16, "v": 960}, {"name": "Schulterpresse", "w": 40.0, "s": 3, "r": 22, "v": 880}, {"name": "Seitenheben", "w": 50.0, "s": 2, "r": 16, "v": 800}]}, {"d": "2026-01-21", "t": "Sonstiges", "vol": 0, "n": 0, "bench": null, "ex": []}, {"d": "2026-01-22", "t": "Push+Beine", "vol": 5900, "n": 4, "bench": [85.0, 5], "ex": [{"name": "Bankdrücken", "w": 85.0, "s": 4, "r": 21, "v": 1560}, {"name": "Butterfly", "w": 100.0, "s": 3, "r": 26, "v": 2600}, {"name": "Triceps pressdown", "w": 18.0, "s": 1, "r": 10, "v": 180}, {"name": "Frenchpress Maschine", "w": 60.0, "s": 3, "r": 26, "v": 1560}]}, {"d": "2026-02-11", "t": "Sonstiges", "vol": 0, "n": 0, "bench": null, "ex": []}, {"d": "2026-03-03", "t": "Push+Pull", "vol": 2820, "n": 3, "bench": [60.0, 8], "ex": [{"name": "Bankdrücken", "w": 60.0, "s": 4, "r": 42, "v": 1700}, {"name": "Butterfly", "w": 20.0, "s": 3, "r": 16, "v": 320}, {"name": "Rudern maschine", "w": 50.0, "s": 2, "r": 16, "v": 800}]}, {"d": "2026-03-09", "t": "Push+Pull", "vol": 2656, "n": 2, "bench": [60.0, 6], "ex": [{"name": "Latzug", "w": 66.0, "s": 4, "r": 29, "v": 1816}, {"name": "Bankdrücken", "w": 60.0, "s": 2, "r": 14, "v": 840}]}, {"d": "2026-03-23", "t": "Push+Pull", "vol": 8465, "n": 5, "bench": [80.0, 5], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 25, "v": 1760}, {"name": "Rudern maschine", "w": 60.0, "s": 4, "r": 49, "v": 2445}, {"name": "Latzug", "w": 60.0, "s": 3, "r": 24, "v": 1440}, {"name": "Butterfly", "w": 60.0, "s": 3, "r": 28, "v": 1680}, {"name": "Triceps Pressdown", "w": 35.0, "s": 4, "r": 34, "v": 1140}]}, {"d": "2026-03-27", "t": "Push+Pull", "vol": 6405, "n": 4, "bench": [80.0, 8], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 6, "r": 42, "v": 3120}, {"name": "Latzug", "w": 65.0, "s": 3, "r": 27, "v": 1705}, {"name": "Rudern", "w": 60.0, "s": 3, "r": 24, "v": 1440}, {"name": "Curls", "w": 20.0, "s": 1, "r": 7, "v": 140}]}, {"d": "2026-03-30", "t": "Push+Pull", "vol": 4410, "n": 3, "bench": [80.0, 6], "ex": [{"name": "Rudern", "w": 70.0, "s": 3, "r": 26, "v": 1770}, {"name": "Latzug", "w": 70.0, "s": 3, "r": 24, "v": 1680}, {"name": "Bankdrücken", "w": 80.0, "s": 2, "r": 14, "v": 960}]}, {"d": "2026-04-04", "t": "Push", "vol": 3030, "n": 2, "bench": [80.0, 8], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 31, "v": 2280}, {"name": "Butterfly Maschine", "w": 65.0, "s": 2, "r": 12, "v": 750}]}, {"d": "2026-04-08", "t": "Push+Beine", "vol": 11151, "n": 7, "bench": [80.0, 8], "ex": [{"name": "Bankdrücken", "w": 80.0, "s": 4, "r": 31, "v": 2300}, {"name": "Butterfly Maschine", "w": 85.0, "s": 4, "r": 26, "v": 2106}, {"name": "Schulterpresse maschine", "w": 40.0, "s": 4, "r": 33, "v": 1100}, {"name": "Seitenheben maschine", "w": 50.0, "s": 2, "r": 16, "v": 800}, {"name": "French Press Maschine", "w": 55.0, "s": 3, "r": 36, "v": 1860}, {"name": "Triceps pressdown V Stange", "w": 35.0, "s": 4, "r": 33, "v": 1105}, {"name": "Beinstrecker", "w": 85.0, "s": 3, "r": 24, "v": 1880}]}, {"d": "2026-04-13", "t": "Push", "vol": 3460, "n": 3, "bench": [85, 7], "ex": [{"name": "Butterfly Kabelturm", "w": 40, "s": 3, "r": 24, "v": 840}, {"name": "Bankdrücken", "w": 85, "s": 4, "r": 27, "v": 2060}, {"name": "Dips (Support)", "w": 20, "s": 4, "r": 28, "v": 560}]}];
+const WEIGHT = [{"d": "2026-04-06", "kg": 99.0}];
+
+// ═══════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════
+const $ = id => document.getElementById(id);
+const dpr = window.devicePixelRatio || 1;
+const today = new Date();
+
+// roundRect polyfill
+if(!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x,y,w,h,r) {
+    if(!Array.isArray(r)) r=[r||0];
+    const tl=r[0]||0,tr=r[1]||tl,br=r[2]||tl,bl=r[3]||tr;
+    this.moveTo(x+tl,y);
+    this.lineTo(x+w-tr,y); this.quadraticCurveTo(x+w,y,x+w,y+tr);
+    this.lineTo(x+w,y+h-br); this.quadraticCurveTo(x+w,y+h,x+w-br,y+h);
+    this.lineTo(x+bl,y+h); this.quadraticCurveTo(x,y+h,x,y+h-bl);
+    this.lineTo(x,y+tl); this.quadraticCurveTo(x,y,x+tl,y);
+    this.closePath();
+  };
+}
+
+function fmtDate(iso) {
+  const [y,m,d] = iso.split('-');
+  return d+'.'+m+'.'+y;
+}
+function fmtPace(p) {
+  if(!p||p<=0) return '-';
+  const m=Math.floor(p);
+  const s=Math.round((p-m)*60);
+  return m+':'+(s<10?'0':'')+s;
+}
+function fmtTime(sec) {
+  if(!sec) return '-';
+  const h=Math.floor(sec/3600);
+  const m=Math.floor((sec%3600)/60);
+  const s=sec%60;
+  if(h>0) return h+'h '+m+'m';
+  return m+':'+((s<10)?'0':'')+s;
+}
+function fmtNum(n) {
+  return n.toLocaleString('de-DE');
+}
+function lerp(a,b,t){ return a+(b-a)*t; }
+
+// E1RM using Epley formula
+function e1rm(w,r) {
+  if(r<=0||w<=0) return 0;
+  if(r===1) return w;
+  return Math.round(w*(1+r/30));
+}
+
+// Linear regression
+function linReg(pts) {
+  const n=pts.length;
+  if(n<2) return {slope:0,intercept:pts[0]?.y||0};
+  let sx=0,sy=0,sxx=0,sxy=0;
+  pts.forEach((p,i)=>{sx+=i;sy+=p.y;sxx+=i*i;sxy+=i*p.y});
+  const slope=(n*sxy-sx*sy)/(n*sxx-sx*sx);
+  const intercept=(sy-slope*sx)/n;
+  return {slope,intercept};
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+let currentPage = 'dashboard';
+
+function showPage(id) {
+  currentPage = id;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  $('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t=>{
+    if(t.textContent.toLowerCase().replace('ö','oe').includes(id.replace('koerper','koerper').replace('oe','')))
+      t.classList.add('active');
+  });
+  // Simpler: find by index
+  const tabs = document.querySelectorAll('.nav-tab');
+  tabs.forEach(t=>t.classList.remove('active'));
+  const map = {'dashboard':0,'gym':1,'laufen':2,'koerper':3};
+  if(tabs[map[id]]) tabs[map[id]].classList.add('active');
+
+  // Trigger chart draws
+  requestAnimationFrame(()=>{
+    if(id==='dashboard') drawDashboard();
+    if(id==='gym') drawGym();
+    if(id==='laufen') drawLaufen();
+    if(id==='koerper') drawKoerper();
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CANVAS UTILS
+// ═══════════════════════════════════════════════════════════════
+function initCanvas(canvas, h) {
+  const w = canvas.offsetWidth || canvas.parentElement.offsetWidth || 600;
+  canvas.width = w * dpr;
+  canvas.height = (h||280) * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = (h||280) + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return {ctx, W:w, H:h||280};
+}
+
+function drawGrid(ctx, W, H, pad, yMin, yMax, steps, fmt) {
+  ctx.strokeStyle = '#1c2030';
+  ctx.lineWidth = 1;
+  ctx.fillStyle = '#6b7194';
+  ctx.font = '10px -apple-system,sans-serif';
+  ctx.textAlign = 'right';
+  for(let i=0;i<=steps;i++) {
+    const y = pad.t + (i/steps)*(H-pad.t-pad.b);
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
+    const val = yMax - (i/steps)*(yMax-yMin);
+    ctx.fillText(fmt ? fmt(val) : Math.round(val).toString(), pad.l-6, y+4);
+  }
+}
+
+function showTooltip(e, val, lbl) {
+  const tt = $('tooltip');
+  $('tt-val').innerHTML = val;
+  $('tt-lbl').innerHTML = lbl;
+  tt.style.display = 'block';
+  tt.style.left = Math.min(e.clientX+14, window.innerWidth-270) + 'px';
+  tt.style.top = (e.clientY-40) + 'px';
+}
+function hideTooltip() { $('tooltip').style.display='none'; }
+
+function setupHover(canvas, points, valueFn, labelFn) {
+  canvas._hoverPts = points;
+  canvas.onmousemove = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    let closest = null, minDist = 25;
+    (canvas._hoverPts||[]).forEach(p => {
+      const d = Math.sqrt((p.x-mx)**2+(p.y-my)**2);
+      if(d<minDist) { minDist=d; closest=p; }
+    });
+    if(closest) showTooltip(e, valueFn(closest), labelFn(closest));
+    else hideTooltip();
+  };
+  canvas.onmouseleave = hideTooltip;
+}
+
+// Badge for session type
+function typeBadge(t) {
+  const cls = t.includes('Push')&&t.includes('Pull')?'mixed':
+    t.includes('Push')?'push':t.includes('Pull')?'pull':
+    t.includes('Bein')?'legs':'other';
+  return '<span class="badge badge-'+cls+'">'+t+'</span>';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════════
+function drawDashboard() {
+  const totalSessions = GYM.length + RUNS.length;
+  const currentWeight = WEIGHT.length ? WEIGHT[WEIGHT.length-1].kg : '~99';
+  const lastBench = [...GYM].reverse().find(s=>s.bench);
+  const benchStr = lastBench ? lastBench.bench[0]+'kg' : '-';
+
+  // KPIs
+  const thisWeek = getThisWeekSessions();
+  $('dash-kpis').innerHTML = [
+    kpiCard(totalSessions, 'Sessions gesamt', 'Gym + Laufen', '--blue'),
+    kpiCard(thisWeek, 'Diese Woche', 'Einheiten', '--green'),
+    kpiCard(currentWeight+'kg', 'Gewicht', 'Ziel: <90kg', '--yellow'),
+    kpiCard(benchStr, 'Bankdrücken', lastBench?'×'+lastBench.bench[1]+' Wdh':'', '--purple'),
+  ].join('');
+
+  $('dash-subtitle').textContent = GYM.length+' Gym-Sessions · '+RUNS.length+' Läufe · '+Math.round(RUNS.reduce((a,r)=>a+r.km,0))+' km';
+
+  drawDashHeatmap();
+  drawDashGymSpark();
+  drawDashRunSpark();
+}
+
+function getThisWeekSessions() {
+  const now = new Date();
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - ((now.getDay()+6)%7));
+  monday.setHours(0,0,0,0);
+  const mStr = monday.toISOString().slice(0,10);
+  return GYM.filter(s=>s.d>=mStr).length + RUNS.filter(r=>r.d>=mStr).length;
+}
+
+function kpiCard(value, label, sub, colorVar) {
+  return `<div class="card kpi"><div class="value" style="color:var(${colorVar})">${value}</div><div class="label">${label}</div><div class="sub">${sub}</div></div>`;
+}
+
+function drawDashHeatmap() {
+  const canvas = $('dash-heatmap');
+  const {ctx,W,H} = initCanvas(canvas, 120);
+  const weeks = 12;
+  const cellW = Math.floor((W-60)/(weeks));
+  const cellH = Math.floor((H-24)/7);
+  const pad = {l:40, t:4};
+
+  // Day labels
+  ctx.fillStyle = '#6b7194';
+  ctx.font = '10px -apple-system,sans-serif';
+  ctx.textAlign = 'right';
+  ['Mo','Di','Mi','Do','Fr','Sa','So'].forEach((d,i) => {
+    ctx.fillText(d, pad.l-6, pad.t + i*cellH + cellH/2 + 4);
+  });
+
+  // Build activity map
+  const actMap = {};
+  GYM.forEach(s => { actMap[s.d] = (actMap[s.d]||0) | 1; });
+  RUNS.forEach(r => { actMap[r.d] = (actMap[r.d]||0) | 2; });
+
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - weeks*7);
+  startDate.setDate(startDate.getDate() - ((startDate.getDay()+6)%7)); // Align to Monday
+
+  for(let w=0; w<weeks; w++) {
+    for(let d=0; d<7; d++) {
+      const date = new Date(startDate);
+      date.setDate(date.getDate() + w*7 + d);
+      const iso = date.toISOString().slice(0,10);
+      const x = pad.l + w*cellW;
+      const y = pad.t + d*cellH;
+      const act = actMap[iso] || 0;
+
+      ctx.fillStyle = act===0 ? '#1a1d27' :
+        act===1 ? 'rgba(79,142,247,.6)' :
+        act===2 ? 'rgba(52,199,123,.6)' :
+        'rgba(167,139,250,.7)'; // both
+      ctx.beginPath();
+      ctx.roundRect(x+1, y+1, cellW-2, cellH-2, 3);
+      ctx.fill();
+    }
+  }
+}
+
+function drawDashGymSpark() {
+  const canvas = $('dash-gym-spark');
+  const {ctx,W,H} = initCanvas(canvas, 140);
+  const recent = GYM.filter(s=>s.d>='2025-06-01');
+  if(!recent.length) return;
+  const pad = {l:50,r:16,t:16,b:28};
+  const vals = recent.map(s=>s.vol);
+  const maxV = Math.max(...vals)*1.1 || 1;
+  const cW = W-pad.l-pad.r;
+  const cH = H-pad.t-pad.b;
+
+  drawGrid(ctx,W,H,pad,0,maxV,4,v=>Math.round(v/1000)+'k');
+
+  const barW = Math.max(3, Math.min(12, cW/recent.length - 2));
+  const pts = [];
+  recent.forEach((s,i)=>{
+    const x = pad.l + (i/(recent.length-1||1))*cW;
+    const h = (s.vol/maxV)*cH;
+    const y = pad.t + cH - h;
+    const c = s.t.includes('Push') ? '#4f8ef7' : s.t.includes('Pull') ? '#34c77b' : '#a78bfa';
+    ctx.fillStyle = c;
+    ctx.globalAlpha = .8;
+    ctx.beginPath();
+    ctx.roundRect(x-barW/2, y, barW, h, [3,3,0,0]);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    pts.push({x,y,data:s});
+  });
+
+  // X labels
+  ctx.fillStyle = '#6b7194';
+  ctx.font = '10px -apple-system,sans-serif';
+  ctx.textAlign = 'center';
+  [0, Math.floor(recent.length/2), recent.length-1].forEach(i=>{
+    if(recent[i]) ctx.fillText(fmtDate(recent[i].d).slice(0,5), pad.l+(i/(recent.length-1||1))*cW, H-6);
+  });
+
+  setupHover(canvas, pts,
+    p => fmtNum(p.data.vol)+' kg',
+    p => fmtDate(p.data.d)+' · '+p.data.t+' · '+p.data.n+' Übungen'
+  );
+}
+
+function drawDashRunSpark() {
+  const canvas = $('dash-run-spark');
+  const {ctx,W,H} = initCanvas(canvas, 140);
+  const recent = RUNS.filter(r=>r.d>='2025-06-01');
+  if(!recent.length) return;
+  const pad = {l:50,r:16,t:16,b:28};
+  const maxKm = Math.max(...recent.map(r=>r.km))*1.1;
+  const cW = W-pad.l-pad.r;
+  const cH = H-pad.t-pad.b;
+
+  drawGrid(ctx,W,H,pad,0,maxKm,4,v=>v.toFixed(0)+'km');
+
+  const pts = [];
+  // Bar + pace overlay
+  const barW = Math.max(4, Math.min(14, cW/recent.length - 2));
+  recent.forEach((r,i)=>{
+    const x = pad.l + (i/(recent.length-1||1))*cW;
+    const h = (r.km/maxKm)*cH;
+    const y = pad.t + cH - h;
+    ctx.fillStyle = 'rgba(52,199,123,.7)';
+    ctx.beginPath();
+    ctx.roundRect(x-barW/2, y, barW, h, [3,3,0,0]);
+    ctx.fill();
+    pts.push({x,y:y,data:r});
+  });
+
+  ctx.fillStyle = '#6b7194';
+  ctx.font = '10px -apple-system,sans-serif';
+  ctx.textAlign = 'center';
+  [0, Math.floor(recent.length/2), recent.length-1].forEach(i=>{
+    if(recent[i]) ctx.fillText(fmtDate(recent[i].d).slice(0,5), pad.l+(i/(recent.length-1||1))*cW, H-6);
+  });
+
+  setupHover(canvas, pts,
+    p => p.data.km+' km',
+    p => fmtDate(p.data.d)+' · '+fmtPace(p.data.pace)+'/km · '+fmtTime(p.data.sec)
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GYM
+// ═══════════════════════════════════════════════════════════════
+let gymMode = 'kg';
+let gymFilter = 'all';
+let gymSortCol = 'd';
+let gymSortAsc = false;
+
+function setGymMode(m) {
+  gymMode = m;
+  document.querySelectorAll('#page-gym .toggle-btn').forEach(b=>b.classList.remove('on'));
+  document.querySelector(`#page-gym .toggle-btn[onclick="setGymMode('${m}')"]`).classList.add('on');
+  drawBenchChart();
+}
+
+function setGymFilter(f) {
+  gymFilter = f;
+  document.querySelectorAll('#gym-filter .filter-btn').forEach(b=>b.classList.toggle('active', b.dataset.f===f));
+  drawVolumeChart();
+}
+
+function drawGym() {
+  const totalVol = GYM.reduce((a,s)=>a+s.vol, 0);
+  const avgVol = GYM.length ? Math.round(totalVol/GYM.length) : 0;
+  const lastBench = [...GYM].reverse().find(s=>s.bench);
+  const peakBench = GYM.reduce((mx,s)=>s.bench&&s.bench[0]>mx?s.bench[0]:mx, 0);
+
+  $('gym-subtitle').textContent = GYM.length+' Sessions · '+fmtNum(totalVol)+' kg Gesamtvolumen';
+  $('gym-kpis').innerHTML = [
+    kpiCard(GYM.length, 'Sessions', GYM[0]?'seit '+fmtDate(GYM[0].d):'', '--blue'),
+    kpiCard(fmtNum(avgVol)+'kg', 'Ø Volumen', 'pro Session', '--green'),
+    kpiCard(lastBench?lastBench.bench[0]+'kg':'-', 'Bench aktuell', lastBench?'×'+lastBench.bench[1]+' Wdh':'', '--yellow'),
+    kpiCard(peakBench+'kg', 'Bench Peak', 'All-time', '--red'),
+  ].join('');
+
+  // Build filter bar
+  const types = [...new Set(GYM.map(s=>s.t))].sort();
+  $('gym-filter').innerHTML = '<button class="filter-btn active" data-f="all" onclick="setGymFilter(\x27all\x27)">Alle</button>' +
+    types.map(t=>'<button class="filter-btn" data-f="'+t+'" onclick="setGymFilter(\x27'+t+'\x27)">'+t+'</button>').join('');
+
+  drawBenchChart();
+  drawVolumeChart();
+  drawSplitDonut();
+  drawGymFreq();
+  buildGymTable();
+}
+
+function drawBenchChart() {
+  const canvas = $('bench-chart');
+  const {ctx,W,H} = initCanvas(canvas, 280);
+  const pad = {l:54, r:20, t:20, b:36};
+  const cW = W-pad.l-pad.r;
+  const cH = H-pad.t-pad.b;
+
+  const benchData = GYM.filter(s=>s.bench).map(s=>({
+    d: s.d,
+    kg: s.bench[0],
+    reps: s.bench[1],
+    vol: s.bench[0] * s.bench[1],
+    est: e1rm(s.bench[0], s.bench[1])
+  }));
+
+  if(!benchData.length) { ctx.fillStyle='#6b7194'; ctx.font='14px sans-serif'; ctx.fillText('Keine Bankdrücken-Daten', W/2-60, H/2); return; }
+
+  const vals = benchData.map(d => gymMode==='kg'?d.kg : gymMode==='vol'?d.vol : d.est);
+  const preInjury = gymMode==='kg'?85 : gymMode==='vol'?85*8 : e1rm(85,8);
+  const peak = gymMode==='kg'?90 : gymMode==='vol'?90*5 : e1rm(90,5);
+  const allVals = [...vals, preInjury, peak];
+  const yMin = Math.min(...allVals)*0.88;
+  const yMax = Math.max(...allVals)*1.08;
+  const unit = gymMode==='kg'?'kg' : gymMode==='vol'?'vol' : '1RM';
+
+  drawGrid(ctx,W,H,pad,yMin,yMax,5, v => Math.round(v)+unit);
+
+  // Reference lines
+  const sy = v => pad.t + cH - ((v-yMin)/(yMax-yMin))*cH;
+  const sx = i => pad.l + (i/(benchData.length-1||1))*cW;
+
+  const drawRef = (val, color, label) => {
+    if(val<yMin||val>yMax) return;
+    const y=sy(val);
+    ctx.save(); ctx.strokeStyle=color; ctx.lineWidth=1; ctx.setLineDash([4,4]); ctx.globalAlpha=.5;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke(); ctx.restore();
+    ctx.fillStyle=color; ctx.font='10px -apple-system,sans-serif'; ctx.textAlign='left'; ctx.globalAlpha=.7;
+    ctx.fillText(label+' '+Math.round(val)+unit, pad.l+4, y-5); ctx.globalAlpha=1;
+  };
+  drawRef(peak, '#e05c6e', 'Peak');
+  drawRef(preInjury, '#f7c948', 'Pre-Injury');
+
+  // Line
+  ctx.strokeStyle = '#4f8ef7';
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  benchData.forEach((d,i) => {
+    const x=sx(i), y=sy(vals[i]);
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  // Area fill
+  ctx.fillStyle = 'rgba(79,142,247,.08)';
+  ctx.beginPath();
+  ctx.moveTo(sx(0), sy(vals[0]));
+  benchData.forEach((_,i) => ctx.lineTo(sx(i), sy(vals[i])));
+  ctx.lineTo(sx(benchData.length-1), pad.t+cH);
+  ctx.lineTo(sx(0), pad.t+cH);
+  ctx.closePath();
+  ctx.fill();
+
+  // Dots
+  const pts = [];
+  benchData.forEach((d,i) => {
+    const x=sx(i), y=sy(vals[i]);
+    ctx.fillStyle = '#4f8ef7';
+    ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#0e1018';
+    ctx.beginPath(); ctx.arc(x,y,2,0,Math.PI*2); ctx.fill();
+    pts.push({x,y,data:d});
+  });
+
+  // X labels
+  ctx.fillStyle = '#6b7194'; ctx.font='10px -apple-system,sans-serif'; ctx.textAlign='center';
+  const step = Math.max(1, Math.floor(benchData.length/8));
+  benchData.forEach((d,i) => {
+    if(i%step===0||i===benchData.length-1) ctx.fillText(fmtDate(d.d).slice(0,5), sx(i), H-pad.b+16);
+  });
+
+  setupHover(canvas, pts,
+    p => {
+      if(gymMode==='kg') return p.data.kg+'kg × '+p.data.reps+' Wdh';
+      if(gymMode==='vol') return fmtNum(p.data.vol)+' vol';
+      return p.data.est+' kg (est.)';
+    },
+    p => fmtDate(p.data.d)+' · E1RM: '+p.data.est+'kg'
+  );
+}
+
+function drawVolumeChart() {
+  const canvas = $('volume-chart');
+  const {ctx,W,H} = initCanvas(canvas, 220);
+  const pad = {l:54, r:16, t:16, b:28};
+  const filtered = gymFilter==='all' ? GYM : GYM.filter(s=>s.t===gymFilter);
+  if(!filtered.length) return;
+
+  const cW = W-pad.l-pad.r;
+  const cH = H-pad.t-pad.b;
+  const maxV = Math.max(...filtered.map(s=>s.vol))*1.1 || 1;
+
+  drawGrid(ctx,W,H,pad,0,maxV,4,v=>Math.round(v/1000)+'k');
+
+  const barW = Math.max(3, Math.min(14, cW/filtered.length-2));
+  const pts = [];
+  filtered.forEach((s,i) => {
+    const x = pad.l + (i/(filtered.length-1||1))*cW;
+    const h = (s.vol/maxV)*cH;
+    const y = pad.t+cH-h;
+    const c = s.t.includes('Push')&&!s.t.includes('Pull')?'#4f8ef7':
+      s.t.includes('Pull')&&!s.t.includes('Push')?'#34c77b':
+      s.t.includes('Bein')?'#a78bfa':'#f7c948';
+    ctx.fillStyle = c;
+    ctx.globalAlpha = .8;
+    ctx.beginPath(); ctx.roundRect(x-barW/2,y,barW,h,[3,3,0,0]); ctx.fill();
+    ctx.globalAlpha = 1;
+    pts.push({x,y,data:s});
+  });
+
+  // Avg line
+  const avg = filtered.reduce((a,s)=>a+s.vol,0)/filtered.length;
+  const avgY = pad.t+cH-(avg/maxV)*cH;
+  ctx.strokeStyle = '#f7c948'; ctx.lineWidth=1; ctx.setLineDash([4,3]); ctx.globalAlpha=.5;
+  ctx.beginPath(); ctx.moveTo(pad.l,avgY); ctx.lineTo(W-pad.r,avgY); ctx.stroke();
+  ctx.setLineDash([]); ctx.globalAlpha=1;
+  ctx.fillStyle='#f7c948'; ctx.font='10px -apple-system,sans-serif'; ctx.textAlign='left';
+  ctx.fillText('Ø '+fmtNum(Math.round(avg))+'kg', pad.l+4, avgY-5);
+
+  // X labels
+  ctx.fillStyle='#6b7194'; ctx.font='10px -apple-system,sans-serif'; ctx.textAlign='center';
+  const step = Math.max(1,Math.floor(filtered.length/8));
+  filtered.forEach((s,i) => {
+    if(i%step===0||i===filtered.length-1) ctx.fillText(fmtDate(s.d).slice(0,5), pad.l+(i/(filtered.length-1||1))*cW, H-6);
+  });
+
+  setupHover(canvas, pts,
+    p=>fmtNum(p.data.vol)+' kg',
+    p=>fmtDate(p.data.d)+' · '+p.data.t+' · '+p.data.n+' Übungen'
+  );
+}
+
+function drawSplitDonut() {
+  const canvas = $('split-donut');
+  const ctx = canvas.getContext('2d');
+  canvas.width = 160*dpr; canvas.height=160*dpr;
+  canvas.style.width='160px'; canvas.style.height='160px';
+  ctx.scale(dpr,dpr);
+
+  const typeCount = {};
+  GYM.forEach(s=>{ typeCount[s.t]=(typeCount[s.t]||0)+1; });
+  const total = GYM.length;
+  $('split-total').textContent = total;
+
+  const colors = {'Push':'#4f8ef7','Pull':'#34c77b','Push+Pull':'#f7c948','Beine':'#a78bfa',
+    'Push+Beine':'#22d3ee','Pull+Beine':'#e05c6e','Sonstiges':'#6b7194'};
+  const sorted = Object.entries(typeCount).sort((a,b)=>b[1]-a[1]);
+
+  let angle = -Math.PI/2;
+  sorted.forEach(([t,n])=>{
+    const sweep = (n/total)*Math.PI*2;
+    ctx.fillStyle = colors[t]||'#6b7194';
+    ctx.beginPath();
+    ctx.moveTo(80,80);
+    ctx.arc(80,80,72,angle,angle+sweep);
+    ctx.closePath();
+    ctx.fill();
+    angle+=sweep;
+  });
+  // Inner circle
+  ctx.fillStyle = '#141722';
+  ctx.beginPath(); ctx.arc(80,80,48,0,Math.PI*2); ctx.fill();
+
+  // Legend
+  $('split-legend').innerHTML = sorted.map(([t,n])=>
+    `<div style="margin-bottom:6px;"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${colors[t]||'#6b7194'};margin-right:8px;vertical-align:middle;"></span>${t} <span style="color:var(--muted)">${n} (${Math.round(n/total*100)}%)</span></div>`
+  ).join('');
+}
+
+function drawGymFreq() {
+  const canvas = $('gym-freq');
+  const {ctx,W,H} = initCanvas(canvas, 180);
+  const pad = {l:40,r:16,t:16,b:32};
+  const byMonth = {};
+  GYM.forEach(s=>{ const m=s.d.slice(0,7); byMonth[m]=(byMonth[m]||0)+1; });
+  const months = Object.keys(byMonth).sort();
+  if(!months.length) return;
+  const cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
+  const maxN = Math.max(...Object.values(byMonth));
+  const barW = Math.max(8, Math.min(28, cW/months.length-4));
+
+  drawGrid(ctx,W,H,pad,0,maxN,4,v=>Math.round(v).toString());
+
+  months.forEach((m,i)=>{
+    const n=byMonth[m];
+    const x=pad.l+(i/(months.length-1||1))*cW;
+    const h=(n/maxN)*cH;
+    const y=pad.t+cH-h;
+    ctx.fillStyle = n>=4?'#34c77b':n>=2?'#4f8ef7':'#e05c6e';
+    ctx.globalAlpha=.8;
+    ctx.beginPath(); ctx.roundRect(x-barW/2,y,barW,h,[3,3,0,0]); ctx.fill();
+    ctx.globalAlpha=1;
+    // Label
+    const [yr,mo]=m.split('-');
+    const names=['','Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+    ctx.fillStyle='#6b7194'; ctx.font='9px -apple-system,sans-serif'; ctx.textAlign='center';
+    if(i%Math.max(1,Math.floor(months.length/10))===0)
+      ctx.fillText(names[parseInt(mo)]+" '"+yr.slice(2), x, H-8);
+  });
+}
+
+function buildGymTable() {
+  const sorted = [...GYM].sort((a,b)=> gymSortAsc? (a[gymSortCol]>b[gymSortCol]?1:-1) : (a[gymSortCol]<b[gymSortCol]?1:-1));
+  $('gym-tbody').innerHTML = sorted.map(s=>{
+    const exStr = s.ex.map(e=>`${e.name} ${e.w}kg ${e.s}×${e.r}`).join(', ');
+    return `<tr>
+      <td>${fmtDate(s.d)}</td>
+      <td>${typeBadge(s.t)}</td>
+      <td>${fmtNum(s.vol)} kg</td>
+      <td>${s.n}</td>
+      <td>${s.bench ? s.bench[0]+'kg ×'+s.bench[1] : '-'}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;font-size:11px;color:var(--muted)">${exStr||'-'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function sortGymTable(col) {
+  if(gymSortCol===col) gymSortAsc=!gymSortAsc;
+  else { gymSortCol=col; gymSortAsc=col==='d'?false:true; }
+  buildGymTable();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LAUFEN
+// ═══════════════════════════════════════════════════════════════
+let runMode = 'pace';
+let runSortCol = 'd';
+let runSortAsc = false;
+
+function setRunMode(m) {
+  runMode = m;
+  document.querySelectorAll('#page-laufen .toggle-btn').forEach(b=>b.classList.remove('on'));
+  document.querySelector(`#page-laufen .toggle-btn[onclick="setRunMode('${m}')"]`).classList.add('on');
+  drawPaceChart();
+}
+
+function drawLaufen() {
+  const totalKm = RUNS.reduce((a,r)=>a+r.km, 0);
+  const totalTime = RUNS.reduce((a,r)=>a+r.sec, 0);
+  const validPaces = RUNS.filter(r=>r.pace>0&&r.pace<15);
+  const avgPace = validPaces.length ? validPaces.reduce((a,r)=>a+r.pace,0)/validPaces.length : 0;
+  const bestPace = validPaces.length ? Math.min(...validPaces.map(r=>r.pace)) : 0;
+  const longestRun = Math.max(...RUNS.map(r=>r.km));
+
+  $('run-subtitle').textContent = RUNS.length+' Läufe · '+Math.round(totalKm)+' km · '+Math.round(totalTime/3600)+'h '+Math.round((totalTime%3600)/60)+'m';
+  $('run-kpis').innerHTML = [
+    kpiCard(Math.round(totalKm)+'km', 'Gesamtdistanz', RUNS.length+' Läufe', '--green'),
+    kpiCard(fmtPace(avgPace), 'Ø Pace', 'min/km', '--blue'),
+    kpiCard(fmtPace(bestPace), 'Beste Pace', 'min/km', '--yellow'),
+    kpiCard(longestRun.toFixed(1)+'km', 'Längster Lauf', '', '--purple'),
+  ].join('');
+
+  drawPaceChart();
+  drawPaceDistScatter();
+  drawRunMonthly();
+  drawPaceHistogram();
+  buildRunPRs();
+  buildRunTable();
+}
+
+function drawPaceChart() {
+  const canvas = $('pace-chart');
+  const {ctx,W,H} = initCanvas(canvas, 300);
+  const pad = {l:54,r:20,t:20,b:36};
+  const cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
+
+  const valid = RUNS.filter(r=>r.pace>0&&r.pace<15);
+  if(!valid.length) return;
+
+  let vals, yMin, yMax, unit, fmt;
+  if(runMode==='pace') {
+    vals = valid.map(r=>r.pace);
+    // Invert Y: lower pace = higher position
+    yMin = Math.min(...vals)*0.9; yMax = Math.max(...vals)*1.05;
+    unit = '/km'; fmt = v=>fmtPace(v);
+    // For pace, we want high values at bottom (slow) and low at top (fast)
+  } else if(runMode==='dist') {
+    vals = valid.map(r=>r.km);
+    yMin = 0; yMax = Math.max(...vals)*1.1;
+    unit = 'km'; fmt = v=>v.toFixed(1)+'km';
+  } else {
+    vals = valid.map(r=>r.sec/60);
+    yMin = 0; yMax = Math.max(...vals)*1.1;
+    unit = 'min'; fmt = v=>Math.round(v)+'m';
+  }
+
+  const invertY = runMode==='pace';
+  const sy = v => {
+    if(invertY) return pad.t + ((v-yMin)/(yMax-yMin))*cH; // Higher pace = lower position
+    return pad.t + cH - ((v-yMin)/(yMax-yMin))*cH;
+  };
+  const sx = i => pad.l + (i/(valid.length-1||1))*cW;
+
+  // Grid
+  const steps = 5;
+  ctx.strokeStyle='#1c2030'; ctx.lineWidth=1;
+  ctx.fillStyle='#6b7194'; ctx.font='10px -apple-system,sans-serif'; ctx.textAlign='right';
+  for(let i=0;i<=steps;i++) {
+    const y = pad.t + (i/steps)*cH;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
+    const val = invertY ? yMin+(i/steps)*(yMax-yMin) : yMax-(i/steps)*(yMax-yMin);
+    ctx.fillText(fmt(val), pad.l-6, y+4);
+  }
+
+  // Color dots by distance
+  const distColor = km => {
+    if(km<5) return '#4f8ef7';
+    if(km<10) return '#34c77b';
+    if(km<15) return '#f7c948';
+    return '#a78bfa';
+  };
+
+  // Trend line
+  const regPts = vals.map((v,i)=>({x:i,y:v}));
+  const reg = linReg(regPts);
+  ctx.strokeStyle = 'rgba(167,139,250,.5)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([5,4]);
+  ctx.beginPath();
+  ctx.moveTo(sx(0), sy(reg.intercept));
+  ctx.lineTo(sx(valid.length-1), sy(reg.intercept+reg.slope*(valid.length-1)));
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Trend label
+  const trendPerMonth = reg.slope * 4; // ~4 runs per month
+  ctx.fillStyle = '#a78bfa'; ctx.font='10px -apple-system,sans-serif'; ctx.textAlign='right';
+  const trendText = runMode==='pace' ?
+    (trendPerMonth<0 ? 'Verbesserung' : 'Verschlechterung') + ' '+Math.abs(trendPerMonth*60).toFixed(0)+'s/Monat' :
+    (trendPerMonth>0 ? '+' : '')+trendPerMonth.toFixed(1)+unit+'/Monat';
+  ctx.fillText('Trend: '+trendText, W-pad.r, pad.t-4);
+
+  // Data points
+  const pts = [];
+  valid.forEach((r,i) => {
+    const x=sx(i), y=sy(vals[i]);
+    ctx.fillStyle = distColor(r.km);
+    ctx.globalAlpha = .9;
+    ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 1;
+    pts.push({x,y,data:r,val:vals[i]});
+  });
+
+  // X labels
+  ctx.fillStyle='#6b7194'; ctx.font='10px -apple-system,sans-serif'; ctx.textAlign='center';
+  const step = Math.max(1,Math.floor(valid.length/10));
+  valid.forEach((r,i) => {
+    if(i%step===0||i===valid.length-1) ctx.fillText(fmtDate(r.d).slice(3,10), sx(i), H-pad.b+16);
+  });
+
+  // Legend for distance colors
+  ctx.textAlign='left';
+  const legend = [['<5km','#4f8ef7'],['5-10km','#34c77b'],['10-15km','#f7c948'],['>15km','#a78bfa']];
+  legend.forEach(([label,color],i) => {
+    const lx = pad.l + i*80;
+    ctx.fillStyle=color; ctx.beginPath(); ctx.arc(lx,H-6,4,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#6b7194'; ctx.font='10px -apple-system,sans-serif';
+    ctx.fillText(label, lx+8, H-2);
+  });
+
+  setupHover(canvas, pts,
+    p => {
+      if(runMode==='pace') return fmtPace(p.data.pace)+'/km';
+      if(runMode==='dist') return p.data.km+'km';
+      return fmtTime(p.data.sec);
+    },
+    p => fmtDate(p.data.d)+' · '+p.data.km+'km · '+fmtPace(p.data.pace)+'/km'+(p.data.hr?' · HR '+p.data.hr:'')
+  );
+}
+
+function drawPaceDistScatter() {
+  const canvas = $('pace-dist-scatter');
+  const {ctx,W,H} = initCanvas(canvas, 220);
+  const pad = {l:50,r:16,t:16,b:32};
+  const cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
+
+  const valid = RUNS.filter(r=>r.pace>0&&r.pace<15);
+  if(!valid.length) return;
+
+  const xMin=0, xMax=Math.max(...valid.map(r=>r.km))*1.1;
+  const yMin=Math.min(...valid.map(r=>r.pace))*0.92, yMax=Math.max(...valid.map(r=>r.pace))*1.05;
+
+  // Grid
+  ctx.strokeStyle='#1c2030'; ctx.lineWidth=1;
+  for(let i=0;i<=4;i++) {
+    const y=pad.t+(i/4)*cH;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
+    const v=yMin+(i/4)*(yMax-yMin);
+    ctx.fillStyle='#6b7194'; ctx.font='10px -apple-system,sans-serif'; ctx.textAlign='right';
+    ctx.fillText(fmtPace(v), pad.l-6, y+4);
+  }
+  // X axis
+  for(let i=0;i<=4;i++) {
+    const x=pad.l+(i/4)*cW;
+    ctx.fillStyle='#6b7194'; ctx.textAlign='center';
+    ctx.fillText(Math.round(xMin+(i/4)*(xMax-xMin))+'km', x, H-8);
+  }
+
+  // Y inverted for pace: high value = bottom
+  const sy = v => pad.t+((v-yMin)/(yMax-yMin))*cH;
+  const sx = v => pad.l+((v-xMin)/(xMax-xMin))*cW;
+
+  // Trend line (pace vs dist)
+  const regPts = valid.map(r=>({x:r.km,y:r.pace}));
+  // Simple correlation
+  const n=regPts.length;
+  let sX=0,sY=0,sXX=0,sXY=0;
+  regPts.forEach(p=>{sX+=p.x;sY+=p.y;sXX+=p.x*p.x;sXY+=p.x*p.y;});
+  const slope=(n*sXY-sX*sY)/(n*sXX-sX*sX);
+  const intercept=(sY-slope*sX)/n;
+
+  ctx.strokeStyle='rgba(247,201,72,.4)'; ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
+  ctx.beginPath(); ctx.moveTo(sx(xMin),sy(intercept)); ctx.lineTo(sx(xMax),sy(intercept+slope*xMax)); ctx.stroke();
+  ctx.setLineDash([]);
+
+  const pts = [];
+  valid.forEach(r => {
+    const x=sx(r.km), y=sy(r.pace);
+    const recent = r.d >= '2025-01-01';
+    ctx.fillStyle = recent ? '#34c77b' : '#4f8ef7';
+    ctx.globalAlpha = recent ? .9 : .4;
+    ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=1;
+    pts.push({x,y,data:r});
+  });
+
+  // Legend
+  ctx.font='10px -apple-system,sans-serif';
+  ctx.fillStyle='#34c77b'; ctx.beginPath(); ctx.arc(pad.l+10, pad.t+10, 4, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#6b7194'; ctx.textAlign='left'; ctx.fillText('2025+', pad.l+18, pad.t+14);
+  ctx.fillStyle='#4f8ef7'; ctx.globalAlpha=.5; ctx.beginPath(); ctx.arc(pad.l+60,pad.t+10,4,0,Math.PI*2); ctx.fill();
+  ctx.globalAlpha=1; ctx.fillStyle='#6b7194'; ctx.fillText('Älter', pad.l+68, pad.t+14);
+
+  setupHover(canvas, pts,
+    p=>p.data.km+'km @ '+fmtPace(p.data.pace)+'/km',
+    p=>fmtDate(p.data.d)+(p.data.hr?' · HR '+p.data.hr:'')
+  );
+}
+
+function drawRunMonthly() {
+  const canvas = $('run-monthly');
+  const {ctx,W,H} = initCanvas(canvas, 220);
+  const pad = {l:50,r:16,t:16,b:32};
+  const cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
+
+  const byMonth = {};
+  RUNS.forEach(r=>{
+    const m=r.d.slice(0,7);
+    if(!byMonth[m]) byMonth[m]={km:0,runs:0,sec:0};
+    byMonth[m].km+=r.km;
+    byMonth[m].runs++;
+    byMonth[m].sec+=r.sec;
+  });
+  const months = Object.keys(byMonth).sort();
+  if(!months.length) return;
+
+  const maxKm = Math.max(...months.map(m=>byMonth[m].km));
+  const barW = Math.max(6, Math.min(24, cW/months.length-3));
+
+  drawGrid(ctx,W,H,pad,0,maxKm*1.1,4,v=>Math.round(v)+'km');
+
+  months.forEach((m,i) => {
+    const d=byMonth[m];
+    const x=pad.l+(i/(months.length-1||1))*cW;
+    const h=(d.km/(maxKm*1.1))*cH;
+    const y=pad.t+cH-h;
+    ctx.fillStyle='rgba(52,199,123,.7)';
+    ctx.beginPath(); ctx.roundRect(x-barW/2,y,barW,h,[3,3,0,0]); ctx.fill();
+
+    // Run count on top
+    ctx.fillStyle='#6b7194'; ctx.font='9px -apple-system,sans-serif'; ctx.textAlign='center';
+    ctx.fillText(d.runs+'×', x, y-4);
+
+    // Month label
+    const [yr,mo]=m.split('-');
+    const names=['','J','F','M','A','M','J','J','A','S','O','N','D'];
+    if(i%Math.max(1,Math.floor(months.length/12))===0)
+      ctx.fillText(names[parseInt(mo)]+"'"+yr.slice(2), x, H-8);
+  });
+}
+
+function drawPaceHistogram() {
+  const canvas = $('pace-histogram');
+  const {ctx,W,H} = initCanvas(canvas, 180);
+  const pad = {l:44,r:16,t:16,b:28};
+  const cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
+
+  const valid = RUNS.filter(r=>r.pace>0&&r.pace<15);
+  // Bins: 4:00-8:00 in 0.5 increments
+  const binSize = 0.5;
+  const minPace = 4, maxPace = 9;
+  const bins = [];
+  for(let p=minPace; p<maxPace; p+=binSize) {
+    const count = valid.filter(r=>r.pace>=p&&r.pace<p+binSize).length;
+    bins.push({from:p, to:p+binSize, n:count});
+  }
+  const maxN = Math.max(...bins.map(b=>b.n));
+  if(!maxN) return;
+
+  const barW = cW/bins.length - 2;
+  bins.forEach((b,i) => {
+    const x = pad.l + i*(barW+2);
+    const h = (b.n/maxN)*cH;
+    const y = pad.t+cH-h;
+    ctx.fillStyle = b.from<5.5?'#34c77b':b.from<6.5?'#4f8ef7':'#f7c948';
+    ctx.globalAlpha = .8;
+    ctx.beginPath(); ctx.roundRect(x,y,barW,h,[3,3,0,0]); ctx.fill();
+    ctx.globalAlpha=1;
+    // Count label
+    if(b.n>0) {
+      ctx.fillStyle='#e8eaf0'; ctx.font='10px -apple-system,sans-serif'; ctx.textAlign='center';
+      ctx.fillText(b.n, x+barW/2, y-4);
+    }
+    // X label
+    ctx.fillStyle='#6b7194'; ctx.font='9px -apple-system,sans-serif'; ctx.textAlign='center';
+    ctx.fillText(fmtPace(b.from), x+barW/2, H-8);
+  });
+}
+
+function buildRunPRs() {
+  const valid = RUNS.filter(r=>r.pace>0&&r.pace<15);
+  const categories = [
+    {label:'5K', filter: r=>r.km>=4.8&&r.km<=5.5},
+    {label:'10K', filter: r=>r.km>=9.5&&r.km<=10.5},
+    {label:'15K', filter: r=>r.km>=14.5&&r.km<=16},
+    {label:'Halbmarathon', filter: r=>r.km>=20&&r.km<=22},
+    {label:'Längster Lauf', filter: ()=>true, metric:'dist'},
+  ];
+
+  let html = '';
+  categories.forEach(cat => {
+    const candidates = valid.filter(cat.filter);
+    if(!candidates.length) return;
+    let best;
+    if(cat.metric==='dist') {
+      best = candidates.reduce((a,b)=>a.km>b.km?a:b);
+      html += `<div class="stat-row"><span class="stat-label">${cat.label}</span><span class="stat-value" style="color:var(--green)">${best.km} km</span></div>`;
+    } else {
+      best = candidates.reduce((a,b)=>a.pace<b.pace?a:b);
+      html += `<div class="stat-row"><span class="stat-label">${cat.label}</span><span class="stat-value" style="color:var(--green)">${fmtPace(best.pace)}/km · ${fmtTime(best.sec)}</span></div>`;
+    }
+    html += `<div style="font-size:11px;color:var(--muted);padding:0 0 8px;">${fmtDate(best.d)} · ${best.km}km</div>`;
+  });
+
+  $('run-prs').innerHTML = html || '<div class="empty">Keine PRs</div>';
+}
+
+function buildRunTable() {
+  const sorted = [...RUNS].sort((a,b) => runSortAsc ? (a[runSortCol]>b[runSortCol]?1:-1) : (a[runSortCol]<b[runSortCol]?1:-1));
+  $('run-tbody').innerHTML = sorted.map(r => {
+    const paceColor = r.pace<5.5?'var(--green)':r.pace<6.5?'var(--blue)':'var(--yellow)';
+    return `<tr>
+      <td>${fmtDate(r.d)}</td>
+      <td style="font-weight:600;color:var(--green)">${r.km} km</td>
+      <td style="color:${paceColor};font-weight:600">${fmtPace(r.pace)}</td>
+      <td>${fmtTime(r.sec)}</td>
+      <td>${r.hr||'-'}</td>
+      <td>${r.cal||'-'}</td>
+      <td>${r.elev?r.elev+'m':'-'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function sortRunTable(col) {
+  if(runSortCol===col) runSortAsc=!runSortAsc;
+  else { runSortCol=col; runSortAsc=col==='d'?false:true; }
+  buildRunTable();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// KÖRPER
+// ═══════════════════════════════════════════════════════════════
+function drawKoerper() {
+  const currentW = WEIGHT.length ? WEIGHT[WEIGHT.length-1].kg : 99;
+  const goal = 90;
+  const pct = Math.max(0, Math.round((1 - (currentW-goal)/(99-goal)) * 100));
+
+  $('body-kpis').innerHTML = [
+    kpiCard(currentW+'kg', 'Aktuell', '', '--text'),
+    kpiCard(goal+'kg', 'Zielgewicht', '<90 kg', '--green'),
+    kpiCard(Math.round((currentW-goal)*10)/10+'kg', 'Noch abzunehmen', '', '--yellow'),
+    kpiCard(pct+'%', 'Fortschritt', 'zum Ziel', '--purple'),
+  ].join('');
+
+  // Weight chart
+  const canvas = $('weight-chart');
+  const {ctx,W,H} = initCanvas(canvas, 280);
+  const pad = {l:54,r:20,t:20,b:36};
+
+  if(WEIGHT.length < 2) {
+    ctx.fillStyle='#6b7194'; ctx.font='14px -apple-system,sans-serif'; ctx.textAlign='center';
+    ctx.fillText('Noch nicht genug Daten — wiege dich jeden Montag morgens!', W/2, H/2-10);
+    ctx.fillText('Aktuell: '+currentW+' kg → Ziel: '+goal+' kg', W/2, H/2+16);
+    return;
+  }
+
+  const cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
+  const vals = WEIGHT.map(w=>w.kg);
+  const yMin = Math.min(goal-2, ...vals)*0.98;
+  const yMax = Math.max(...vals)*1.02;
+
+  drawGrid(ctx,W,H,pad,yMin,yMax,5,v=>v.toFixed(1)+'kg');
+
+  const sy=v=>pad.t+cH-((v-yMin)/(yMax-yMin))*cH;
+  const sx=i=>pad.l+(i/(WEIGHT.length-1||1))*cW;
+
+  // Goal line
+  const goalY=sy(goal);
+  ctx.strokeStyle='#34c77b'; ctx.lineWidth=1; ctx.setLineDash([4,4]); ctx.globalAlpha=.6;
+  ctx.beginPath(); ctx.moveTo(pad.l,goalY); ctx.lineTo(W-pad.r,goalY); ctx.stroke();
+  ctx.setLineDash([]); ctx.globalAlpha=1;
+  ctx.fillStyle='#34c77b'; ctx.font='10px -apple-system,sans-serif'; ctx.textAlign='left';
+  ctx.fillText('Ziel '+goal+'kg', pad.l+4, goalY-5);
+
+  // Line
+  ctx.strokeStyle='#f7c948'; ctx.lineWidth=2.5; ctx.lineJoin='round';
+  ctx.beginPath();
+  WEIGHT.forEach((w,i) => i===0 ? ctx.moveTo(sx(i),sy(w.kg)) : ctx.lineTo(sx(i),sy(w.kg)));
+  ctx.stroke();
+
+  // Dots
+  WEIGHT.forEach((w,i) => {
+    ctx.fillStyle='#f7c948'; ctx.beginPath(); ctx.arc(sx(i),sy(w.kg),5,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#0e1018'; ctx.beginPath(); ctx.arc(sx(i),sy(w.kg),2.5,0,Math.PI*2); ctx.fill();
+  });
+}
+
+// Goals
+function drawGoals() {
+  const goals = [
+    {title:'Unter 90kg', current:WEIGHT.length?WEIGHT[WEIGHT.length-1].kg:99, target:90, start:99, unit:'kg', color:'var(--green)', invert:true},
+    {title:'Bankdrücken 90kg', current: (() => { const b=[...GYM].reverse().find(s=>s.bench); return b?b.bench[0]:0; })(), target:90, start:60, unit:'kg', color:'var(--blue)'},
+    {title:'10km Lauf', current: Math.max(...RUNS.filter(r=>r.d>='2026-01-01').map(r=>r.km),0), target:10, start:0, unit:'km', color:'var(--purple)'},
+  ];
+
+  $('goals-grid').innerHTML = goals.map(g => {
+    const pct = g.invert
+      ? Math.max(0, Math.min(100, Math.round((1-(g.current-g.target)/(g.start-g.target))*100)))
+      : Math.max(0, Math.min(100, Math.round(((g.current-g.start)/(g.target-g.start))*100)));
+    return `<div class="card" style="padding:20px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">${g.title}</div>
+      <div style="font-size:24px;font-weight:700;color:${g.color}">${g.current}${g.unit}</div>
+      <div style="font-size:12px;color:var(--muted);margin:4px 0 10px">Ziel: ${g.target}${g.unit}</div>
+      <div class="progress"><div class="progress-fill" style="width:${pct}%;background:${g.color}"></div></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">${pct}% erreicht</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  drawDashboard();
+  drawGoals();
+});
+window.addEventListener('resize', () => {
+  if(currentPage==='dashboard') drawDashboard();
+  if(currentPage==='gym') drawGym();
+  if(currentPage==='laufen') drawLaufen();
+  if(currentPage==='koerper') drawKoerper();
+});
+</script>
 </body>
 </html>
