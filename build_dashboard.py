@@ -306,6 +306,36 @@ body{{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacS
 .kpi .value{{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.2;}}
 .kpi .label{{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:4px;}}
 .kpi .sub{{font-size:12px;color:var(--muted);margin-top:2px;}}
+.kpi .trend{{font-size:11px;margin-top:3px;font-weight:600;}}
+.kpi .trend.up{{color:var(--green);}}
+.kpi .trend.down{{color:var(--red);}}
+.kpi .mini-bar{{height:4px;background:var(--s3);border-radius:99px;margin:8px auto 0;width:80%;overflow:hidden;}}
+.kpi .mini-bar-fill{{height:100%;border-radius:99px;transition:width .6s ease;}}
+
+/* ── DASH WEEKLY ── */
+.week-row{{display:flex;gap:6px;align-items:flex-end;height:100%;}}
+.week-col{{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;}}
+.week-col.current{{background:rgba(79,142,247,.06);border-radius:var(--radius-sm);margin:-4px -2px;padding:4px 2px;}}
+.week-bars{{display:flex;flex-direction:column;gap:1px;width:100%;height:100%;justify-content:flex-end;}}
+.week-bar{{width:100%;border-radius:2px;min-height:0;transition:height .4s ease;}}
+.week-label{{font-size:9px;color:var(--muted);white-space:nowrap;}}
+.week-count{{font-size:11px;font-weight:600;}}
+
+/* ── FEED ── */
+.feed-item{{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;}}
+.feed-item:last-child{{border-bottom:none;}}
+.feed-item:hover{{background:var(--s2);margin:0 -12px;padding:12px;border-radius:var(--radius-sm);}}
+.feed-dot{{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}}
+.feed-body{{flex:1;min-width:0;}}
+.feed-title{{font-size:13px;font-weight:600;}}
+.feed-meta{{font-size:11px;color:var(--muted);}}
+.feed-value{{font-size:15px;font-weight:700;text-align:right;white-space:nowrap;}}
+
+/* ── MONTH SUMMARY ── */
+.month-stat{{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}}
+.month-stat:last-child{{border-bottom:none;}}
+.month-stat .ms-label{{font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px;}}
+.month-stat .ms-val{{font-size:14px;font-weight:600;}}
 
 /* ── SECTION HEADER ── */
 .section-head{{display:flex;align-items:center;justify-content:space-between;margin:32px 0 16px;flex-wrap:wrap;gap:8px;}}
@@ -432,29 +462,47 @@ th.sorted .sort-arrow{{opacity:1;color:var(--blue);}}
     <p id="dash-subtitle">Gesamtübersicht</p>
   </div>
   <div class="grid grid-4" id="dash-kpis"></div>
-  <div class="section-head"><span class="section-title">Letzte 12 Wochen</span></div>
-  <div class="card card-lg">
-    <div class="chart-header">
-      <span class="chart-title">Trainingsaktivität</span>
-      <div class="chart-legend">
-        <span><span class="leg-dot" style="background:var(--blue)"></span>Gym</span>
-        <span><span class="leg-dot" style="background:var(--green)"></span>Laufen</span>
-      </div>
+
+  <div class="section-head">
+    <span class="section-title">Wochenübersicht — Letzte 12 Wochen</span>
+    <div class="chart-legend">
+      <span><span class="leg-dot" style="background:var(--blue)"></span>Gym</span>
+      <span><span class="leg-dot" style="background:var(--green)"></span>Laufen</span>
+      <span style="color:var(--muted);font-size:11px">Ziel: 4/Woche</span>
     </div>
-    <canvas id="dash-heatmap" height="120"></canvas>
   </div>
+  <div class="card card-lg">
+    <canvas id="dash-weekly" height="180"></canvas>
+  </div>
+
   <div class="grid grid-2" style="margin-top:16px">
     <div class="card card-lg">
       <div class="chart-header">
-        <span class="chart-title">Gym — Volumen-Trend</span>
+        <span class="chart-title">Letzte Einheiten</span>
+        <span style="font-size:11px;color:var(--muted)" id="feed-range"></span>
       </div>
-      <canvas id="dash-gym-spark" height="140"></canvas>
+      <div id="dash-feed"></div>
     </div>
     <div class="card card-lg">
       <div class="chart-header">
-        <span class="chart-title">Laufen — Distanz & Pace</span>
+        <span class="chart-title" id="month-title">Diesen Monat</span>
       </div>
-      <canvas id="dash-run-spark" height="140"></canvas>
+      <div id="dash-month-stats"></div>
+    </div>
+  </div>
+
+  <div class="grid grid-2" style="margin-top:16px">
+    <div class="card card-lg">
+      <div class="chart-header">
+        <span class="chart-title">Bankdrücken — Est. 1RM Trend</span>
+      </div>
+      <canvas id="dash-bench-trend" height="150"></canvas>
+    </div>
+    <div class="card card-lg">
+      <div class="chart-header">
+        <span class="chart-title">Laufen — Pace-Trend</span>
+      </div>
+      <canvas id="dash-pace-trend" height="150"></canvas>
     </div>
   </div>
 </div>
@@ -755,25 +803,75 @@ function typeBadge(t) {{
 // DASHBOARD
 // ═══════════════════════════════════════════════════════════════
 function drawDashboard() {{
-  const totalSessions = GYM.length + RUNS.length;
-  const currentWeight = WEIGHT.length ? WEIGHT[WEIGHT.length-1].kg : '~99';
+  // ── Compute key metrics ──
+  const currentWeight = WEIGHT.length ? WEIGHT[WEIGHT.length-1].kg : 99;
   const lastBench = [...GYM].reverse().find(s=>s.bench);
-  const benchStr = lastBench ? lastBench.bench[0]+'kg' : '-';
+  const benchKg = lastBench ? lastBench.bench[0] : 0;
+  const benchReps = lastBench ? lastBench.bench[1] : 0;
+  const benchE1rm = e1rm(benchKg, benchReps);
+  const prevBench = [...GYM].reverse().filter(s=>s.bench);
+  const benchTrend = prevBench.length>=2 ? prevBench[0].bench[0]-prevBench[1].bench[0] : 0;
 
-  // KPIs
+  // Streak: consecutive weeks with >=1 session
+  const streak = calcStreak();
   const thisWeek = getThisWeekSessions();
+  const weekTarget = 4;
+
+  // ── KPIs ──
   $('dash-kpis').innerHTML = [
-    kpiCard(totalSessions, 'Sessions gesamt', 'Gym + Laufen', '--blue'),
-    kpiCard(thisWeek, 'Diese Woche', 'Einheiten', '--green'),
-    kpiCard(currentWeight+'kg', 'Gewicht', 'Ziel: <90kg', '--yellow'),
-    kpiCard(benchStr, 'Bankdrücken', lastBench?'×'+lastBench.bench[1]+' Wdh':'', '--purple'),
+    `<div class="card kpi">
+      <div class="value" style="color:var(--green)">${{thisWeek}}/${{weekTarget}}</div>
+      <div class="label">Diese Woche</div>
+      <div class="mini-bar"><div class="mini-bar-fill" style="width:${{Math.min(100,thisWeek/weekTarget*100)}}%;background:${{thisWeek>=weekTarget?'var(--green)':'var(--yellow)'}}"></div></div>
+    </div>`,
+    `<div class="card kpi">
+      <div class="value" style="color:var(--yellow)">${{streak}}</div>
+      <div class="label">Wochen-Streak</div>
+      <div class="sub">am Stück aktiv</div>
+    </div>`,
+    `<div class="card kpi">
+      <div class="value" style="color:var(--blue)">${{benchKg}}kg</div>
+      <div class="label">Bankdrücken</div>
+      <div class="trend ${{benchTrend>=0?'up':'down'}}">${{benchTrend>0?'+':''}}${{benchTrend}}kg · 1RM ~${{benchE1rm}}kg</div>
+    </div>`,
+    `<div class="card kpi">
+      <div class="value" style="color:var(--purple)">${{currentWeight}}kg</div>
+      <div class="label">Gewicht</div>
+      <div class="mini-bar"><div class="mini-bar-fill" style="width:${{Math.max(0,Math.min(100,(1-(currentWeight-90)/(99-90))*100))}}%;background:var(--purple)"></div></div>
+      <div class="sub">Ziel: &lt;90kg</div>
+    </div>`,
   ].join('');
 
-  $('dash-subtitle').textContent = GYM.length+' Gym-Sessions · '+RUNS.length+' Läufe · '+Math.round(RUNS.reduce((a,r)=>a+r.km,0))+' km';
+  $('dash-subtitle').textContent = GYM.length+' Gym · '+RUNS.length+' Läufe · '+Math.round(RUNS.reduce((a,r)=>a+r.km,0))+' km gesamt';
 
-  drawDashHeatmap();
-  drawDashGymSpark();
-  drawDashRunSpark();
+  drawWeeklyChart();
+  drawDashFeed();
+  drawMonthStats();
+  drawDashBenchTrend();
+  drawDashPaceTrend();
+}}
+
+function calcStreak() {{
+  // Weeks in a row with >=1 session, counting back from current week
+  const allDates = [...GYM.map(s=>s.d), ...RUNS.map(r=>r.d)].sort().reverse();
+  if(!allDates.length) return 0;
+  const getWeekKey = (iso) => {{
+    const d = new Date(iso);
+    const mon = new Date(d); mon.setDate(d.getDate()-((d.getDay()+6)%7));
+    return mon.toISOString().slice(0,10);
+  }};
+  const weeks = new Set(allDates.map(getWeekKey));
+  let streak = 0;
+  let check = new Date();
+  check.setDate(check.getDate()-((check.getDay()+6)%7)); // this monday
+  check.setHours(0,0,0,0);
+  for(let i=0; i<52; i++) {{
+    const key = check.toISOString().slice(0,10);
+    if(weeks.has(key)) streak++;
+    else break;
+    check.setDate(check.getDate()-7);
+  }}
+  return streak;
 }}
 
 function getThisWeekSessions() {{
@@ -789,130 +887,303 @@ function kpiCard(value, label, sub, colorVar) {{
   return `<div class="card kpi"><div class="value" style="color:var(${{colorVar}})">${{value}}</div><div class="label">${{label}}</div><div class="sub">${{sub}}</div></div>`;
 }}
 
-function drawDashHeatmap() {{
-  const canvas = $('dash-heatmap');
-  const {{ctx,W,H}} = initCanvas(canvas, 120);
-  const weeks = 12;
-  const cellW = Math.floor((W-60)/(weeks));
-  const cellH = Math.floor((H-24)/7);
-  const pad = {{l:40, t:4}};
-
-  // Day labels
-  ctx.fillStyle = '#6b7194';
-  ctx.font = '10px -apple-system,sans-serif';
-  ctx.textAlign = 'right';
-  ['Mo','Di','Mi','Do','Fr','Sa','So'].forEach((d,i) => {{
-    ctx.fillText(d, pad.l-6, pad.t + i*cellH + cellH/2 + 4);
-  }});
-
-  // Build activity map
-  const actMap = {{}};
-  GYM.forEach(s => {{ actMap[s.d] = (actMap[s.d]||0) | 1; }});
-  RUNS.forEach(r => {{ actMap[r.d] = (actMap[r.d]||0) | 2; }});
-
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - weeks*7);
-  startDate.setDate(startDate.getDate() - ((startDate.getDay()+6)%7)); // Align to Monday
-
-  for(let w=0; w<weeks; w++) {{
-    for(let d=0; d<7; d++) {{
-      const date = new Date(startDate);
-      date.setDate(date.getDate() + w*7 + d);
-      const iso = date.toISOString().slice(0,10);
-      const x = pad.l + w*cellW;
-      const y = pad.t + d*cellH;
-      const act = actMap[iso] || 0;
-
-      ctx.fillStyle = act===0 ? '#1a1d27' :
-        act===1 ? 'rgba(79,142,247,.6)' :
-        act===2 ? 'rgba(52,199,123,.6)' :
-        'rgba(167,139,250,.7)'; // both
-      ctx.beginPath();
-      ctx.roundRect(x+1, y+1, cellW-2, cellH-2, 3);
-      ctx.fill();
-    }}
-  }}
-}}
-
-function drawDashGymSpark() {{
-  const canvas = $('dash-gym-spark');
-  const {{ctx,W,H}} = initCanvas(canvas, 140);
-  const recent = GYM.filter(s=>s.d>='2025-06-01');
-  if(!recent.length) return;
-  const pad = {{l:50,r:16,t:16,b:28}};
-  const vals = recent.map(s=>s.vol);
-  const maxV = Math.max(...vals)*1.1 || 1;
+// ── WEEKLY BAR CHART ──
+function drawWeeklyChart() {{
+  const canvas = $('dash-weekly');
+  const {{ctx,W,H}} = initCanvas(canvas, 180);
+  const pad = {{l:36, r:12, t:24, b:36}};
   const cW = W-pad.l-pad.r;
   const cH = H-pad.t-pad.b;
+  const nWeeks = 12;
+  const target = 4;
 
-  drawGrid(ctx,W,H,pad,0,maxV,4,v=>Math.round(v/1000)+'k');
+  // Build weekly data
+  const weeks = [];
+  const now = new Date();
+  const curMon = new Date(now);
+  curMon.setDate(now.getDate()-((now.getDay()+6)%7));
+  curMon.setHours(0,0,0,0);
 
-  const barW = Math.max(3, Math.min(12, cW/recent.length - 2));
-  const pts = [];
-  recent.forEach((s,i)=>{{
-    const x = pad.l + (i/(recent.length-1||1))*cW;
-    const h = (s.vol/maxV)*cH;
-    const y = pad.t + cH - h;
-    const c = s.t.includes('Push') ? '#4f8ef7' : s.t.includes('Pull') ? '#34c77b' : '#a78bfa';
-    ctx.fillStyle = c;
-    ctx.globalAlpha = .8;
-    ctx.beginPath();
-    ctx.roundRect(x-barW/2, y, barW, h, [3,3,0,0]);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-    pts.push({{x,y,data:s}});
-  }});
+  for(let i=nWeeks-1; i>=0; i--) {{
+    const mon = new Date(curMon);
+    mon.setDate(curMon.getDate()-i*7);
+    const sun = new Date(mon); sun.setDate(mon.getDate()+6);
+    const mStr = mon.toISOString().slice(0,10);
+    const sStr = sun.toISOString().slice(0,10);
+    const gym = GYM.filter(s=>s.d>=mStr && s.d<=sStr).length;
+    const run = RUNS.filter(r=>r.d>=mStr && r.d<=sStr).length;
+    // KW number
+    const jan1 = new Date(mon.getFullYear(),0,1);
+    const kw = Math.ceil(((mon-jan1)/86400000+jan1.getDay()+1)/7);
+    weeks.push({{kw, gym, run, total:gym+run, isCurrent:i===0, mStr, sStr}});
+  }}
 
-  // X labels
-  ctx.fillStyle = '#6b7194';
+  const maxTotal = Math.max(target+1, ...weeks.map(w=>w.total));
+  const barW = Math.max(16, Math.min(48, cW/nWeeks-8));
+
+  // Target line
+  const targetY = pad.t + cH - (target/maxTotal)*cH;
+  ctx.strokeStyle = 'rgba(247,201,72,.35)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4,3]);
+  ctx.beginPath(); ctx.moveTo(pad.l, targetY); ctx.lineTo(W-pad.r, targetY); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(247,201,72,.6)';
   ctx.font = '10px -apple-system,sans-serif';
-  ctx.textAlign = 'center';
-  [0, Math.floor(recent.length/2), recent.length-1].forEach(i=>{{
-    if(recent[i]) ctx.fillText(fmtDate(recent[i].d).slice(0,5), pad.l+(i/(recent.length-1||1))*cW, H-6);
+  ctx.textAlign = 'right';
+  ctx.fillText('Ziel '+target+'x', pad.l-4, targetY+4);
+
+  const pts = [];
+  weeks.forEach((w,i) => {{
+    const x = pad.l + (i+0.5)/nWeeks * cW;
+    const gymH = (w.gym/maxTotal)*cH;
+    const runH = (w.run/maxTotal)*cH;
+    const totalH = gymH+runH;
+    const baseY = pad.t + cH;
+
+    // Highlight current week bg
+    if(w.isCurrent) {{
+      ctx.fillStyle = 'rgba(79,142,247,.06)';
+      ctx.beginPath();
+      ctx.roundRect(x-barW/2-4, pad.t-4, barW+8, cH+12, 6);
+      ctx.fill();
+    }}
+
+    // Gym bar (bottom)
+    if(w.gym>0) {{
+      ctx.fillStyle = w.isCurrent ? '#4f8ef7' : 'rgba(79,142,247,.7)';
+      ctx.beginPath();
+      ctx.roundRect(x-barW/2, baseY-gymH, barW, gymH, w.run>0?[0,0,3,3]:[3,3,3,3]);
+      ctx.fill();
+    }}
+    // Run bar (stacked on top)
+    if(w.run>0) {{
+      ctx.fillStyle = w.isCurrent ? '#34c77b' : 'rgba(52,199,123,.7)';
+      ctx.beginPath();
+      ctx.roundRect(x-barW/2, baseY-totalH, barW, runH, w.gym>0?[3,3,0,0]:[3,3,3,3]);
+      ctx.fill();
+    }}
+    // Zero state
+    if(w.total===0) {{
+      ctx.fillStyle = 'rgba(224,92,110,.25)';
+      ctx.beginPath();
+      ctx.roundRect(x-barW/2, baseY-3, barW, 3, 2);
+      ctx.fill();
+    }}
+
+    // Count on top
+    if(w.total>0) {{
+      ctx.fillStyle = w.total>=target ? '#34c77b' : w.total>=2 ? '#c0c4d4' : '#e05c6e';
+      ctx.font = '11px -apple-system,sans-serif';
+      ctx.fontWeight = '600';
+      ctx.textAlign = 'center';
+      ctx.fillText(w.total, x, baseY-totalH-6);
+    }}
+
+    // KW label
+    ctx.fillStyle = w.isCurrent ? '#e8eaf0' : '#6b7194';
+    ctx.font = (w.isCurrent?'bold ':'')+' 10px -apple-system,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('KW'+w.kw, x, H-pad.b+14);
+    // Month tick on first week of month
+    if(i===0 || weeks[i-1]?.mStr?.slice(5,7)!==w.mStr.slice(5,7)) {{
+      const mNames = ['','Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+      ctx.fillStyle = '#6b7194';
+      ctx.font = '9px -apple-system,sans-serif';
+      ctx.fillText(mNames[parseInt(w.mStr.slice(5,7))], x, H-pad.b+26);
+    }}
+
+    pts.push({{x, y:baseY-totalH, data:w}});
   }});
 
   setupHover(canvas, pts,
-    p => fmtNum(p.data.vol)+' kg',
-    p => fmtDate(p.data.d)+' · '+p.data.t+' · '+p.data.n+' Übungen'
+    p => p.data.total + ' Einheiten',
+    p => 'KW'+p.data.kw + (p.data.isCurrent?' (aktuell)':'') + ' · '+p.data.gym+' Gym + '+p.data.run+' Lauf'
   );
 }}
 
-function drawDashRunSpark() {{
-  const canvas = $('dash-run-spark');
-  const {{ctx,W,H}} = initCanvas(canvas, 140);
-  const recent = RUNS.filter(r=>r.d>='2025-06-01');
-  if(!recent.length) return;
-  const pad = {{l:50,r:16,t:16,b:28}};
-  const maxKm = Math.max(...recent.map(r=>r.km))*1.1;
-  const cW = W-pad.l-pad.r;
-  const cH = H-pad.t-pad.b;
+// ── RECENT SESSIONS FEED ──
+function drawDashFeed() {{
+  const all = [
+    ...GYM.map(s=>({{d:s.d, type:'gym', label:s.t, val:s.bench?s.bench[0]+'kg ×'+s.bench[1]:fmtNum(s.vol)+'kg vol', color:'var(--blue)', icon:'G', details:s.ex.map(e=>e.name).join(', ')}})),
+    ...RUNS.map(r=>({{d:r.d, type:'run', label:'Lauf', val:r.km+'km', color:'var(--green)', icon:'L', details:fmtPace(r.pace)+'/km · '+fmtTime(r.sec)}}))
+  ].sort((a,b)=>b.d.localeCompare(a.d)).slice(0,6);
 
-  drawGrid(ctx,W,H,pad,0,maxKm,4,v=>v.toFixed(0)+'km');
+  if(all.length) {{
+    $('feed-range').textContent = fmtDate(all[all.length-1].d)+' – '+fmtDate(all[0].d);
+  }}
 
+  $('dash-feed').innerHTML = all.map(s => `
+    <div class="feed-item" onclick="showPage('${{s.type==='gym'?'gym':'laufen'}}')">
+      <div class="feed-dot" style="background:${{s.type==='gym'?'rgba(79,142,247,.15)':'rgba(52,199,123,.15)'}};color:${{s.color}};font-weight:700;font-size:12px;">${{s.icon}}</div>
+      <div class="feed-body">
+        <div class="feed-title">${{s.label}} <span style="font-weight:400;color:var(--muted);font-size:12px">${{fmtDate(s.d)}}</span></div>
+        <div class="feed-meta">${{s.details.substring(0,50)}}</div>
+      </div>
+      <div class="feed-value" style="color:${{s.color}}">${{s.val}}</div>
+    </div>
+  `).join('');
+}}
+
+// ── MONTH SUMMARY ──
+function drawMonthStats() {{
+  const mNames = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  const now = new Date();
+  const mStr = now.toISOString().slice(0,7); // YYYY-MM
+  $('month-title').textContent = mNames[now.getMonth()] + ' ' + now.getFullYear();
+
+  const gymThisMonth = GYM.filter(s=>s.d.startsWith(mStr));
+  const runsThisMonth = RUNS.filter(r=>r.d.startsWith(mStr));
+  const kmThisMonth = runsThisMonth.reduce((a,r)=>a+r.km,0);
+  const volThisMonth = gymThisMonth.reduce((a,s)=>a+s.vol,0);
+  const benchSessions = gymThisMonth.filter(s=>s.bench);
+  const bestBenchMonth = benchSessions.length ? Math.max(...benchSessions.map(s=>s.bench[0])) : null;
+  const bestPaceMonth = runsThisMonth.filter(r=>r.pace>0).length
+    ? Math.min(...runsThisMonth.filter(r=>r.pace>0).map(r=>r.pace)) : null;
+
+  const stats = [
+    {{icon:'rgba(79,142,247,.15)', ic:'var(--blue)', label:'Gym-Sessions', val:gymThisMonth.length}},
+    {{icon:'rgba(52,199,123,.15)', ic:'var(--green)', label:'Läufe', val:runsThisMonth.length}},
+    {{icon:'rgba(52,199,123,.15)', ic:'var(--green)', label:'Kilometer', val:kmThisMonth.toFixed(1)+' km'}},
+    {{icon:'rgba(79,142,247,.15)', ic:'var(--blue)', label:'Gym-Volumen', val:fmtNum(volThisMonth)+' kg'}},
+  ];
+  if(bestBenchMonth) stats.push({{icon:'rgba(247,201,72,.15)',ic:'var(--yellow)',label:'Bestes Bench',val:bestBenchMonth+'kg'}});
+  if(bestPaceMonth) stats.push({{icon:'rgba(167,139,250,.15)',ic:'var(--purple)',label:'Beste Pace',val:fmtPace(bestPaceMonth)+'/km'}});
+
+  $('dash-month-stats').innerHTML = stats.map(s=>`
+    <div class="month-stat">
+      <div class="ms-label"><span style="width:8px;height:8px;border-radius:50%;background:${{s.ic}};display:inline-block;"></span>${{s.label}}</div>
+      <div class="ms-val">${{s.val}}</div>
+    </div>
+  `).join('');
+}}
+
+// ── BENCH EST. 1RM TREND (Dashboard) ──
+function drawDashBenchTrend() {{
+  const canvas = $('dash-bench-trend');
+  const {{ctx,W,H}} = initCanvas(canvas, 150);
+  const pad = {{l:44,r:12,t:12,b:24}};
+  const cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
+
+  const benchData = GYM.filter(s=>s.bench).map(s=>({{d:s.d, e:e1rm(s.bench[0],s.bench[1])}}));
+  const recent = benchData.slice(-15); // last 15
+  if(recent.length<2) return;
+
+  const vals = recent.map(d=>d.e);
+  const yMin = Math.min(...vals)*0.92;
+  const yMax = Math.max(...vals)*1.06;
+  const sy = v => pad.t+cH-((v-yMin)/(yMax-yMin))*cH;
+  const sx = i => pad.l+(i/(recent.length-1))*cW;
+
+  // Grid
+  drawGrid(ctx,W,H,pad,yMin,yMax,3,v=>Math.round(v)+'kg');
+
+  // Area fill
+  ctx.fillStyle = 'rgba(79,142,247,.08)';
+  ctx.beginPath();
+  ctx.moveTo(sx(0), sy(vals[0]));
+  recent.forEach((_,i)=>ctx.lineTo(sx(i), sy(vals[i])));
+  ctx.lineTo(sx(recent.length-1), pad.t+cH);
+  ctx.lineTo(sx(0), pad.t+cH);
+  ctx.closePath(); ctx.fill();
+
+  // Line
+  ctx.strokeStyle = '#4f8ef7'; ctx.lineWidth=2; ctx.lineJoin='round';
+  ctx.beginPath();
+  recent.forEach((d,i)=>i===0?ctx.moveTo(sx(i),sy(d.e)):ctx.lineTo(sx(i),sy(d.e)));
+  ctx.stroke();
+
+  // Dots
   const pts = [];
-  // Bar + pace overlay
-  const barW = Math.max(4, Math.min(14, cW/recent.length - 2));
-  recent.forEach((r,i)=>{{
-    const x = pad.l + (i/(recent.length-1||1))*cW;
-    const h = (r.km/maxKm)*cH;
-    const y = pad.t + cH - h;
-    ctx.fillStyle = 'rgba(52,199,123,.7)';
-    ctx.beginPath();
-    ctx.roundRect(x-barW/2, y, barW, h, [3,3,0,0]);
-    ctx.fill();
-    pts.push({{x,y:y,data:r}});
+  recent.forEach((d,i) => {{
+    ctx.fillStyle='#4f8ef7'; ctx.beginPath(); ctx.arc(sx(i),sy(d.e),3,0,Math.PI*2); ctx.fill();
+    pts.push({{x:sx(i),y:sy(d.e),data:d}});
   }});
 
-  ctx.fillStyle = '#6b7194';
-  ctx.font = '10px -apple-system,sans-serif';
-  ctx.textAlign = 'center';
-  [0, Math.floor(recent.length/2), recent.length-1].forEach(i=>{{
-    if(recent[i]) ctx.fillText(fmtDate(recent[i].d).slice(0,5), pad.l+(i/(recent.length-1||1))*cW, H-6);
-  }});
+  // X labels
+  ctx.fillStyle='#6b7194'; ctx.font='9px -apple-system,sans-serif'; ctx.textAlign='center';
+  [0, recent.length-1].forEach(i=>ctx.fillText(fmtDate(recent[i].d).slice(0,5), sx(i), H-4));
+
+  // Current value label
+  const last = recent[recent.length-1];
+  ctx.fillStyle='#4f8ef7'; ctx.font='bold 12px -apple-system,sans-serif'; ctx.textAlign='right';
+  ctx.fillText(last.e+'kg', W-pad.r, pad.t+10);
 
   setupHover(canvas, pts,
-    p => p.data.km+' km',
-    p => fmtDate(p.data.d)+' · '+fmtPace(p.data.pace)+'/km · '+fmtTime(p.data.sec)
+    p=>'Est. 1RM: '+p.data.e+'kg',
+    p=>fmtDate(p.data.d)
+  );
+}}
+
+// ── PACE TREND (Dashboard) ──
+function drawDashPaceTrend() {{
+  const canvas = $('dash-pace-trend');
+  const {{ctx,W,H}} = initCanvas(canvas, 150);
+  const pad = {{l:44,r:12,t:12,b:24}};
+  const cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
+
+  const recent = RUNS.filter(r=>r.pace>0&&r.pace<15).slice(-20);
+  if(recent.length<2) return;
+
+  const vals = recent.map(r=>r.pace);
+  const yMin = Math.min(...vals)*0.95;
+  const yMax = Math.max(...vals)*1.03;
+  // Inverted: lower pace (faster) = higher on chart
+  const sy = v => pad.t + ((v-yMin)/(yMax-yMin))*cH;
+  const sx = i => pad.l+(i/(recent.length-1))*cW;
+
+  // Grid (inverted labels)
+  ctx.strokeStyle='#1c2030'; ctx.lineWidth=1;
+  ctx.fillStyle='#6b7194'; ctx.font='10px -apple-system,sans-serif'; ctx.textAlign='right';
+  for(let i=0;i<=3;i++) {{
+    const y=pad.t+(i/3)*cH;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
+    const v=yMin+(i/3)*(yMax-yMin);
+    ctx.fillText(fmtPace(v), pad.l-6, y+4);
+  }}
+
+  // Area fill
+  ctx.fillStyle='rgba(52,199,123,.08)';
+  ctx.beginPath();
+  ctx.moveTo(sx(0), sy(vals[0]));
+  recent.forEach((_,i)=>ctx.lineTo(sx(i), sy(vals[i])));
+  ctx.lineTo(sx(recent.length-1), pad.t);
+  ctx.lineTo(sx(0), pad.t);
+  ctx.closePath(); ctx.fill();
+
+  // Trend line
+  const regPts = vals.map((v,i)=>({{x:i,y:v}}));
+  const reg = linReg(regPts);
+  ctx.strokeStyle='rgba(167,139,250,.5)'; ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
+  ctx.beginPath(); ctx.moveTo(sx(0),sy(reg.intercept)); ctx.lineTo(sx(recent.length-1),sy(reg.intercept+reg.slope*(recent.length-1))); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Line
+  ctx.strokeStyle='#34c77b'; ctx.lineWidth=2; ctx.lineJoin='round';
+  ctx.beginPath();
+  recent.forEach((r,i)=>i===0?ctx.moveTo(sx(i),sy(r.pace)):ctx.lineTo(sx(i),sy(r.pace)));
+  ctx.stroke();
+
+  // Dots
+  const pts = [];
+  recent.forEach((r,i) => {{
+    const c = r.km<5?'#4f8ef7':r.km<10?'#34c77b':'#f7c948';
+    ctx.fillStyle=c; ctx.beginPath(); ctx.arc(sx(i),sy(r.pace),3,0,Math.PI*2); ctx.fill();
+    pts.push({{x:sx(i),y:sy(r.pace),data:r}});
+  }});
+
+  // X labels
+  ctx.fillStyle='#6b7194'; ctx.font='9px -apple-system,sans-serif'; ctx.textAlign='center';
+  [0, recent.length-1].forEach(i=>ctx.fillText(fmtDate(recent[i].d).slice(0,5), sx(i), H-4));
+
+  // Current avg pace
+  const avgP = vals.reduce((a,b)=>a+b,0)/vals.length;
+  ctx.fillStyle='#34c77b'; ctx.font='bold 12px -apple-system,sans-serif'; ctx.textAlign='right';
+  ctx.fillText('Ø '+fmtPace(avgP)+'/km', W-pad.r, pad.t+10);
+
+  setupHover(canvas, pts,
+    p=>fmtPace(p.data.pace)+'/km',
+    p=>fmtDate(p.data.d)+' · '+p.data.km+'km · '+fmtTime(p.data.sec)
   );
 }}
 
