@@ -41,10 +41,12 @@
 ## Sportarten & Status
 
 ### Gym (Prio 1)
-- Split: Push / Pull / Beine (Beine pausiert wegen Hexenschuss, werden ab ~13.04.2026 wieder eingeführt)
+- Split: Push / Pull / Beine — **Beine ab 14.04.2026 wieder aktiv** (Maschinen, kontrolliert)
 - Kein Kniebeugen/Kreuzheben aktuell — erst nach Freigabe durch Physio
 - Hexenschuss ~Anfang Feb 2026 → 7 Wochen Pause → seit ~Ende März 2026 im Wiederaufbau
 - **Bankdrücken:** aktuell 85 kg zurück (13.04.2026: 85×7, 85×5, 80×6-7) | vor Verletzung: 85 kg Arbeitssatz
+- **Beinbeuger:** wieder eingeführt 14.04.2026 — 55→70→80 kg, kontrolliert, kein Schmerz
+- **Latzug Maschine:** 80 kg × 2×8 (14.04.2026)
 - Kein Maxkrafttest bisher
 - Physiotherapie (Emilia, Physiovital Aachen) läuft aktiv — Termine im Kalender
 

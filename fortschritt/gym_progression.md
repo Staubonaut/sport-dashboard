@@ -1,6 +1,6 @@
 # Gym Progression
-**Stand:** 13.04.2026  |  **Analysierte Einheiten:** 101
-**Zeitraum:** 14.01.2024 – 13.04.2026
+**Stand:** 14.04.2026  |  **Analysierte Einheiten:** 102
+**Zeitraum:** 14.01.2024 – 14.04.2026
 
 ---
 ## Bankdrücken (Hauptindikator)
@@ -35,13 +35,15 @@
 
 ---
 ## Weitere Übungen — Peak-Gewichte
-| Übung | Höchstes Gewicht |
-|---|---|
-| Latzug / Latpull | 113.0 kg |
-| Rudern | 93.0 kg |
-| Butterfly Maschine | 103.0 kg |
-| Schulterpresse | 50.0 kg |
-| Klimmzug (Zusatzgewicht) | +40.0 kg |
+| Übung | Höchstes Gewicht | Aktuell (Comeback) |
+|---|---|---|
+| Latzug / Latpull | 113.0 kg | 80 kg (14.04.2026) |
+| Rudern | 93.0 kg | 60 kg (14.04.2026) |
+| Butterfly Maschine | 103.0 kg | — |
+| Schulterpresse | 50.0 kg | — |
+| Klimmzug (Support) | — | 15 kg Support (14.04.2026) |
+| Beinbeuger | — | 80 kg (14.04.2026, wieder eingeführt) |
+| Wadenpresse | — | 80 kg (14.04.2026) |
 
 ---
 ## Trainingsfrequenz (letzte 6 Monate)
@@ -52,4 +54,4 @@
 | Jan 2026 | 11 |
 | Feb 2026 | 1 |
 | Mär 2026 | 5 |
-| Apr 2026 | 2 |
+| Apr 2026 | 3 |

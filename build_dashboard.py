@@ -158,6 +158,36 @@ def load_gym():
                 {"name": "Dips (Support)", "w": 20, "s": 4, "r": 28, "v": round(20*8+20*7+20*8+20*5)},
             ]
         },
+        {
+            "d": "2026-04-14",
+            "t": "Pull+Beine",
+            "vol": round(
+                20*1*8 + 15*2*6 +           # Klimmzug Support
+                70*2*8 +                     # Latzug eng
+                70*1*7 + 70*1*6 +            # Latzug breit
+                60*1*8 + 60*2*10 +           # Rudern Maschine
+                60*1*8 + 60*1*10 +           # Rudern Kabelzug
+                80*2*8 +                     # Latzug Maschine
+                20*1*5 + 18*1*6 + 16*2*8 +  # Hammer Curls
+                40*2*8 +                     # Preacher Curls
+                55*1*10 + 70*1*10 + 80*2*10 + 80*1*8 +  # Beinbeuger
+                60*1*15 + 80*1*13 + 80*2*12             # Wadenpresse
+            ),
+            "n": 10,
+            "bench": None,
+            "ex": [
+                {"name": "Klimmzug (Support)", "w": 20, "s": 3, "r": 20, "v": round(20*8+15*12)},
+                {"name": "Latzug eng", "w": 70, "s": 2, "r": 16, "v": round(70*2*8)},
+                {"name": "Latzug breit", "w": 70, "s": 2, "r": 13, "v": round(70*13)},
+                {"name": "Rudern Maschine", "w": 60, "s": 3, "r": 28, "v": round(60*1*8+60*2*10)},
+                {"name": "Rudern Kabelzug", "w": 60, "s": 2, "r": 18, "v": round(60*18)},
+                {"name": "Latzug Maschine", "w": 80, "s": 2, "r": 16, "v": round(80*2*8)},
+                {"name": "Hammer Curls", "w": 20, "s": 4, "r": 27, "v": round(20*5+18*6+16*2*8)},
+                {"name": "Preacher Curls Maschine", "w": 40, "s": 2, "r": 16, "v": round(40*2*8)},
+                {"name": "Beinbeuger", "w": 80, "s": 5, "r": 48, "v": round(55*10+70*10+80*2*10+80*8)},
+                {"name": "Wadenpresse sitzend", "w": 80, "s": 4, "r": 52, "v": round(60*15+80*13+80*2*12)},
+            ]
+        },
     ]
     existing_dates = {s["d"] for s in sessions}
     for extra in notion_extras:
